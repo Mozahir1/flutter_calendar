@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 
 import '../../calendar_view.dart';
+import '../constants.dart';
 import '../extensions.dart';
 
 class MonthView<T extends Object?> extends StatefulWidget {
@@ -378,7 +379,7 @@ class MonthViewState<T extends Object?> extends State<MonthView<T>> {
                               child: SizedBox(
                                 width: _cellWidth,
                                 child:
-                                    _weekBuilder(weekDays[index].weekday - 1),
+                                    _weekBuilder(Constants.getWeekTitleIndex(weekDays[index].weekday)),
                               ),
                             ),
                           ),
