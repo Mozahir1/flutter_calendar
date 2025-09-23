@@ -775,14 +775,26 @@ class WeekViewState<T extends Object?> extends State<WeekView<T>> {
 
   /// Default builder for week line.
   Widget _defaultWeekDayBuilder(DateTime date) {
+    // Map weekday to correct index for Sunday-Saturday format
+    // date.weekday: 1=Monday, 2=Tuesday, ..., 7=Sunday
+    // Constants.weekTitles: ["S", "M", "T", "W", "T", "F", "S"] (Sunday to Saturday)
+    int weekTitleIndex;
+    if (date.weekday == 7) {
+      // Sunday -> index 0
+      weekTitleIndex = 0;
+    } else {
+      // Monday-Saturday -> index 1-6
+      weekTitleIndex = date.weekday;
+    }
+    
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            widget.weekDayStringBuilder?.call(date.weekday - 1) ??
-                Constants.weekTitles[date.weekday - 1],
+            widget.weekDayStringBuilder?.call(weekTitleIndex) ??
+                Constants.weekTitles[weekTitleIndex],
             style: TextStyle(
               color: context.weekViewColors.weekDayTextColor,
             ),

@@ -802,8 +802,8 @@ class MultiDayViewState<T extends Object?> extends State<MultiDayView<T>> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            widget.weekDayStringBuilder?.call(date.weekday - 1) ??
-                Constants.weekTitles[date.weekday - 1],
+            widget.weekDayStringBuilder?.call(_getWeekTitleIndex(date.weekday)) ??
+                Constants.weekTitles[_getWeekTitleIndex(date.weekday)],
             style: TextStyle(
               color: textColor,
             ),
@@ -818,6 +818,19 @@ class MultiDayViewState<T extends Object?> extends State<MultiDayView<T>> {
         ],
       ),
     );
+  }
+
+  /// Helper function to map weekday to correct index for Sunday-Saturday format
+  int _getWeekTitleIndex(int weekday) {
+    // date.weekday: 1=Monday, 2=Tuesday, ..., 7=Sunday
+    // Constants.weekTitles: ["S", "M", "T", "W", "T", "F", "S"] (Sunday to Saturday)
+    if (weekday == 7) {
+      // Sunday -> index 0
+      return 0;
+    } else {
+      // Monday-Saturday -> index 1-6
+      return weekday;
+    }
   }
 
   /// Default builder for week number.
