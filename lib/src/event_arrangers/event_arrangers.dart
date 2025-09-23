@@ -14,6 +14,8 @@ part 'merge_event_arranger.dart';
 
 part 'side_event_arranger.dart';
 
+part 'full_width_event_arranger.dart';
+
 /// {@template event_arranger_arrange_method_doc}
 /// This method will arrange all the events in and return List of
 /// [OrganizedCalendarEventData].
@@ -24,9 +26,9 @@ abstract class EventArranger<T extends Object?> {
   /// [EventArranger] defines how simultaneous events will be arranged.
   /// Implement [arrange] method to define how events will be arranged.
   ///
-  /// There are three predefined class that implements of [EventArranger].
+  /// There are four predefined class that implements of [EventArranger].
   ///
-  /// [_StackEventArranger], [SideEventArranger] and [MergeEventArranger].
+  /// [_StackEventArranger], [SideEventArranger], [MergeEventArranger], and [FullWidthEventArranger].
   ///
   const EventArranger();
 
