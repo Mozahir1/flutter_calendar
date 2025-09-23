@@ -43,8 +43,30 @@ class WeekPageHeader extends CalendarPageHeader {
           headerStyle: headerStyle,
         );
 
-  static String _weekStringBuilder(DateTime date, {DateTime? secondaryDate}) =>
-      "${date.day} / ${date.month} / ${date.year} to "
-      "${secondaryDate != null ? "${secondaryDate.day} / "
-          "${secondaryDate.month} / ${secondaryDate.year}" : ""}";
+  static String _weekStringBuilder(DateTime date, {DateTime? secondaryDate}) {
+    const monthNames = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    
+    if (secondaryDate != null) {
+      // Check if both dates are in the same month and year
+      if (date.month == secondaryDate.month && date.year == secondaryDate.year) {
+        // Same month: "September 15-21, 2024"
+        final monthName = monthNames[date.month - 1];
+        return "$monthName ${date.day}-${secondaryDate.day}, ${date.year}";
+      } else {
+        // Different months: "September 29, 2024 to October 5, 2024"
+        final startMonthName = monthNames[date.month - 1];
+        final endMonthName = monthNames[secondaryDate.month - 1];
+        final startDateStr = "$startMonthName ${date.day}, ${date.year}";
+        final endDateStr = "$endMonthName ${secondaryDate.day}, ${secondaryDate.year}";
+        return "$startDateStr to $endDateStr";
+      }
+    }
+    
+    // Single date: "September 15, 2024"
+    final monthName = monthNames[date.month - 1];
+    return "$monthName ${date.day}, ${date.year}";
+  }
 }
