@@ -1,0 +1,23 @@
+{
+  "name": "flutter-calendar-view-dev",
+  "version": "1.0.0",
+  "description": "Development scripts for Flutter Calendar View custom fork",
+  "scripts": {
+    "dev": "bash web-dev.sh",
+    "build": "bash web-build-production.sh",
+    "serve": "bash web-serve.sh",
+    "clean": "cd example && flutter clean",
+    "deps": "cd example && flutter pub get"
+  },
+  "devDependencies": {
+    "serve": "^14.2.0"
+  },
+  "keywords": [
+    "flutter",
+    "calendar",
+    "web",
+    "development"
+  ],
+  "author": "Custom Fork",
+  "license": "MIT"
+}
