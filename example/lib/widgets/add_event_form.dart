@@ -312,17 +312,14 @@ class _AddOrEditEventFormState extends State<AddOrEditEventForm> {
             minLines: 1,
             maxLines: 10,
             maxLength: 1000,
-            validator: (value) {
-              if (value == null || value.trim() == "") {
-                return "Please enter event description.";
-              }
-
-              return null;
-            },
-            decoration: InputDecoration(
-              hintText: "Event Description",
-              counterStyle: TextStyle(color: color.onSurfaceVariant),
-            ).applyDefaults(Theme.of(context).inputDecorationTheme),
+             validator: (value) {
+               // Description is optional, no validation required
+               return null;
+             },
+             decoration: InputDecoration(
+               hintText: "Event Description (Optional)",
+               counterStyle: TextStyle(color: color.onSurfaceVariant),
+             ).applyDefaults(Theme.of(context).inputDecorationTheme),
           ),
           // Only show repeat settings if the event is recurring
           if (_isRecurring) ...[
