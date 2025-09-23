@@ -42,6 +42,12 @@ class DayPageHeader extends CalendarPageHeader {
           headerStyle: headerStyle,
         );
 
-  static String _dayStringBuilder(DateTime date, {DateTime? secondaryDate}) =>
-      "${date.day} - ${date.month} - ${date.year}";
+  static String _dayStringBuilder(DateTime date, {DateTime? secondaryDate}) {
+    const monthNames = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    final monthName = monthNames[date.month - 1];
+    return "$monthName ${date.day}, ${date.year}";
+  }
 }
