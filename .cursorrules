@@ -1,0 +1,98 @@
+# Cursor Rules for Flutter Calendar View Custom Fork
+
+## Core Principles
+
+- **MINIMAL CHANGES**: Only make necessary, incremental modifications
+- **PRESERVE STRUCTURE**: Maintain the existing code architecture and patterns
+- **BACKWARD COMPATIBILITY**: Ensure changes don't break existing functionality
+- **INCREMENTAL ENHANCEMENT**: Add features without major refactoring
+
+## Change Guidelines
+
+### ✅ ALLOWED Changes
+
+1. **Add new methods/properties** to existing classes (non-breaking)
+2. **Add new optional parameters** to existing methods with default values
+3. **Add new classes/files** for additional functionality
+4. **Extend existing enums** with new values
+5. **Add new theme properties** to existing theme classes
+6. **Add new event types** or event properties
+7. **Add new view configurations** or options
+8. **Bug fixes** that don't change public API
+9. **Performance improvements** that maintain existing behavior
+10. **Documentation updates** and code comments
+
+### ❌ FORBIDDEN Changes
+
+1. **Remove existing public methods/properties** (breaking changes)
+2. **Change method signatures** of existing public APIs
+3. **Modify existing enum values** or their meanings
+4. **Restructure existing class hierarchies** significantly
+5. **Change existing file/class names** without deprecation
+6. **Remove or rename existing theme properties**
+7. **Change existing event data structure** in breaking ways
+8. **Modify core calendar logic** that affects existing behavior
+9. **Remove existing exports** from main library file
+10. **Change existing constants** or their values
+
+### 🔧 Implementation Rules
+
+#### When Adding New Features
+
+- Create new classes/files rather than modifying existing ones extensively
+- Use composition over inheritance when possible
+- Add new optional parameters with sensible defaults
+- Follow existing naming conventions and patterns
+- Add comprehensive documentation for new features
+
+#### When Modifying Existing Code
+
+- Use deprecation annotations for any changes that might affect users
+- Maintain existing method signatures
+- Add new functionality as extensions or new methods
+- Preserve existing behavior while adding new options
+- Test thoroughly to ensure no regressions
+
+#### Code Style
+
+- Follow existing Dart/Flutter conventions
+- Maintain consistent indentation and formatting
+- Use meaningful variable and method names
+- Add comments for complex logic
+- Follow the existing file organization structure
+
+#### Testing Requirements
+
+- Add tests for new functionality
+- Ensure existing tests continue to pass
+- Test backward compatibility
+- Verify no performance regressions
+
+## File Modification Priorities
+
+1. **Low Risk**: Adding new files/classes
+2. **Medium Risk**: Adding new methods to existing classes
+3. **High Risk**: Modifying existing method implementations
+4. **Critical Risk**: Changing public API signatures
+
+## Review Checklist
+
+Before making any changes, verify:
+
+- [ ] Change is minimal and necessary
+- [ ] No existing functionality is broken
+- [ ] New code follows existing patterns
+- [ ] Documentation is updated
+- [ ] Tests are added/updated
+- [ ] Backward compatibility is maintained
+
+## Emergency Overrides
+
+If a breaking change is absolutely necessary:
+
+1. Mark the old method/property as `@deprecated`
+2. Add the new implementation alongside the old one
+3. Provide clear migration documentation
+4. Plan for removal in a future version
+
+Remember: This is a fork of an existing package. Changes should enhance functionality without disrupting existing users or the original package's design philosophy.

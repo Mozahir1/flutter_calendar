@@ -1,0 +1,56 @@
+# Flutter Calendar View - Custom Fork
+
+## Project Overview
+This is a custom fork of the open-source Flutter Calendar View package (v2.0.0) by Simform Solutions. The original package provides calendar UI components and event management functionality for Flutter applications.
+
+## Original Package Details
+- **Name**: calendar_view
+- **Version**: 2.0.0
+- **Original Repository**: https://github.com/SimformSolutionsPvtLtd/flutter_calendar_view
+- **License**: MIT
+- **Flutter SDK**: >=1.17.0, Dart SDK: >=2.15.0 <4.0.0
+
+## Current Features (Original)
+- Multiple calendar view options: Month View, Day View, Week View
+- Highly customizable UI components
+- Event management (add, remove, update)
+- Reminder management (add, remove, update)
+- Full-day event support
+- Working days display in week/day views
+- Event data synchronization between views
+
+## Project Structure
+```
+lib/
+├── calendar_view.dart (main export file)
+└── src/
+    ├── calendar_constants.dart
+    ├── calendar_controller_provider.dart
+    ├── calendar_event_data.dart
+    ├── calendar_theme_provider.dart
+    ├── components/ (UI components)
+    ├── day_view/ (day view implementation)
+    ├── month_view/ (month view implementation)
+    ├── week_view/ (week view implementation)
+    ├── multi_day_view/ (multi-day view implementation)
+    ├── event_arrangers/ (event positioning logic)
+    ├── event_controller.dart (event management)
+    ├── theme/ (theming system)
+    ├── style/ (styling components)
+    └── enumerations.dart (enums and constants)
+```
+
+## Purpose of This Fork
+This fork is being customized to add specific features and modifications needed for a different project. The goal is to enhance the original calendar package with additional functionality while maintaining compatibility with the original API.
+
+## Key Components
+- **Calendar Views**: Month, Day, Week, Multi-day views
+- **Event System**: Event data model, controllers, and arrangers
+- **Theming**: Comprehensive theming system for all views
+- **Components**: Reusable UI components for calendar functionality
+
+## Development Notes
+- This is a fork for customization purposes
+- Changes should be minimal and incremental
+- Maintain backward compatibility where possible
+- Focus on adding features rather than restructuring existing code
