@@ -39,6 +39,11 @@ class MonthPageHeader extends CalendarPageHeader {
           headerStyle: headerStyle,
         );
 
-  static String _monthStringBuilder(DateTime date, {DateTime? secondaryDate}) =>
-      "${date.month} - ${date.year}";
+  static String _monthStringBuilder(DateTime date, {DateTime? secondaryDate}) {
+    const monthNames = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    return "${monthNames[date.month - 1]} ${date.year}";
+  }
 }
