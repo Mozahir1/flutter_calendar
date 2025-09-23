@@ -361,8 +361,9 @@ class MonthViewState<T extends Object?> extends State<MonthView<T>> {
                 onPageChanged: _onPageChange,
                 itemBuilder: (_, index) {
                   final date = DateTime(_minDate.year, _minDate.month + index);
+                  // Always generate week headers starting from Sunday for consistent display
                   final weekDays = date.datesOfWeek(
-                    start: widget.startDay,
+                    start: WeekDays.sunday,
                     showWeekEnds: widget.showWeekends,
                   );
 
@@ -392,6 +393,7 @@ class MonthViewState<T extends Object?> extends State<MonthView<T>> {
                               startDay: widget.startDay,
                               hideDaysNotInMonth: widget.hideDaysNotInMonth,
                               showWeekends: widget.showWeekends,
+                              forceSundayStart: true,
                             );
                             final _cellAspectRatio =
                                 widget.useAvailableVerticalSpace
@@ -761,6 +763,7 @@ class _MonthPageBuilder<T> extends StatelessWidget {
       startDay: startDay,
       hideDaysNotInMonth: hideDaysNotInMonth,
       showWeekends: weekDays == 7,
+      forceSundayStart: true,
     );
 
     // Highlight tiles which is not in current month

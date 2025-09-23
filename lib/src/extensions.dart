@@ -148,12 +148,17 @@ extension DateTimeExtensions on DateTime {
     WeekDays startDay = WeekDays.sunday,
     bool hideDaysNotInMonth = false,
     bool showWeekends = true,
+    bool forceSundayStart = false,
   }) {
     final monthDays = <DateTime>[];
+    
+    // For month view, always use Sunday as the start day to ensure consistent grid layout
+    final effectiveStartDay = forceSundayStart ? WeekDays.sunday : startDay;
+    
     // Start is the first weekday for each week in a month
     for (var i = 1, start = 1; i < 7; i++, start += 7) {
       final datesInWeek =
-          DateTime(year, month, start).datesOfWeek(start: startDay).where(
+          DateTime(year, month, start).datesOfWeek(start: effectiveStartDay).where(
                 (day) =>
                     showWeekends ||
                     (day.weekday != DateTime.saturday &&
