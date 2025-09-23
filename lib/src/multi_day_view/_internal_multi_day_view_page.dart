@@ -102,7 +102,7 @@ class InternalMultiDayViewPage<T extends Object?> extends StatefulWidget {
   /// Defines which days should be displayed in one week.
   ///
   /// By default all the days will be visible.
-  /// Sequence will be monday to sunday.
+  /// Sequence will be sunday to saturday.
   final List<WeekDays> weekDays;
 
   /// Called when user long press on calendar.

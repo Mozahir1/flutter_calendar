@@ -85,7 +85,7 @@ class MonthView<T extends Object?> extends StatefulWidget {
   ///
   /// Used default week builder if null.
   ///
-  /// Here day will range from 0 to 6 starting from Monday to Sunday.
+  /// Here day will range from 0 to 6 starting from Sunday to Saturday.
   final WeekDayBuilder? weekDayBuilder;
 
   /// Determines the lower boundary user can scroll.
@@ -162,7 +162,7 @@ class MonthView<T extends Object?> extends StatefulWidget {
 
   ///   /// Defines the day from which the week starts.
   ///
-  /// Default value is [WeekDays.monday].
+  /// Default value is [WeekDays.sunday].
   final WeekDays startDay;
 
   /// Style for MontView header.
@@ -215,7 +215,7 @@ class MonthView<T extends Object?> extends StatefulWidget {
     this.onEventLongTapDetails,
     this.onEventDoubleTapDetails,
     this.onDateLongPress,
-    this.startDay = WeekDays.monday,
+    this.startDay = WeekDays.sunday,
     this.headerStringBuilder,
     this.dateStringBuilder,
     this.weekDayStringBuilder,

@@ -175,7 +175,7 @@ class MultiDayView<T extends Object?> extends StatefulWidget {
   /// Defines which days should be displayed in one week.
   ///
   /// By default all the days will be visible.
-  /// Sequence will be monday to sunday.
+  /// Sequence will be sunday to saturday.
   ///
   /// Duplicate values will be removed from list.
   ///
@@ -196,7 +196,7 @@ class MultiDayView<T extends Object?> extends StatefulWidget {
 
   /// Defines the day from which the week starts.
   ///
-  /// Default value is [WeekDays.monday].
+  /// Default value is [WeekDays.sunday].
   // final WeekDays startDay;
 
   /// Defines size of the slots that provides long press callback on area
@@ -293,7 +293,7 @@ class MultiDayView<T extends Object?> extends StatefulWidget {
     this.onDateTap,
     // this.weekDays = WeekDays.values,
     // this.showWeekends = true,
-    // this.startDay = WeekDays.monday,
+    // this.startDay = WeekDays.sunday,
     this.minuteSlotSize = MinuteSlotSize.minutes60,
     this.weekDetectorBuilder,
     this.headerStringBuilder,

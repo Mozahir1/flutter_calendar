@@ -36,7 +36,7 @@ extension DateTimeExtensions on DateTime {
       .abs();
 
   /// Gets difference of weeks between [date] and calling object.
-  int getWeekDifference(DateTime date, {WeekDays start = WeekDays.monday}) =>
+  int getWeekDifference(DateTime date, {WeekDays start = WeekDays.sunday}) =>
       (firstDayOfWeek(start: start)
                   .difference(date.firstDayOfWeek(start: start))
                   .inDays
@@ -64,14 +64,14 @@ extension DateTimeExtensions on DateTime {
 
   /// Returns The List of date of Current Week, all of the dates will be without
   /// time.
-  /// Day will start from Monday to Sunday.
+  /// Day will start from Sunday to Saturday.
   ///
   /// ex: if Current Date instance is 8th and day is wednesday then weekDates
   /// will return dates
   /// [6,7,8,9,10,11,12]
-  /// Where on 6th there will be monday and on 12th there will be Sunday
+  /// Where on 6th there will be Sunday and on 12th there will be Saturday
   List<DateTime> datesOfWeek({
-    WeekDays start = WeekDays.monday,
+    WeekDays start = WeekDays.sunday,
     bool showWeekEnds = true,
   }) {
     // Here %7 ensure that we do not subtract >6 and <0 days.
@@ -100,11 +100,11 @@ extension DateTimeExtensions on DateTime {
   }
 
   /// Returns the first date of week containing the current date
-  DateTime firstDayOfWeek({WeekDays start = WeekDays.monday}) =>
+  DateTime firstDayOfWeek({WeekDays start = WeekDays.sunday}) =>
       DateTime(year, month, day - ((weekday - start.index - 1) % 7));
 
   /// Returns the last date of week containing the current date
-  DateTime lastDayOfWeek({WeekDays start = WeekDays.monday}) =>
+  DateTime lastDayOfWeek({WeekDays start = WeekDays.sunday}) =>
       DateTime(year, month, day + (6 - (weekday - start.index - 1) % 7));
 
   DateTime firstDayOfMultiDay({
@@ -145,7 +145,7 @@ extension DateTimeExtensions on DateTime {
   /// It excludes week if `hideDaysNotInMonth` is set true and
   /// if all dates in week comes in next month then it will excludes that week.
   List<DateTime> datesOfMonths({
-    WeekDays startDay = WeekDays.monday,
+    WeekDays startDay = WeekDays.sunday,
     bool hideDaysNotInMonth = false,
     bool showWeekends = true,
   }) {
