@@ -768,7 +768,7 @@ class _MonthPageBuilder<T> extends StatelessWidget {
       width: width,
       height: height,
       child: GridView.builder(
-        padding: EdgeInsets.zero,
+        padding: EdgeInsets.all(4.0), // Add padding around the grid
         physics: physics,
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: weekDays,
@@ -786,7 +786,9 @@ class _MonthPageBuilder<T> extends StatelessWidget {
             onTap: () => onCellTap?.call(events, monthDays[index]),
             onLongPress: () => onDateLongPress?.call(monthDays[index]),
             child: Container(
+              margin: EdgeInsets.all(2.0), // Add some spacing between cells
               decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8.0), // Add rounded corners
                 border: showBorder
                     ? Border.all(
                         color: borderColor ??

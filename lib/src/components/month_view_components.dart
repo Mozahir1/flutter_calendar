@@ -140,7 +140,10 @@ class FilledCell<T extends Object?> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: backgroundColor,
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(8.0), // Add rounded corners
+      ),
       child: Column(
         children: [
           SizedBox(
@@ -276,10 +279,11 @@ class _WeekDayTileState extends State<WeekDayTile> {
 
     return Container(
       alignment: Alignment.center,
-      margin: EdgeInsets.zero,
+      margin: EdgeInsets.all(2.0), // Add some spacing
       padding: EdgeInsets.symmetric(vertical: 10.0),
       decoration: BoxDecoration(
         color: widget.backgroundColor ?? themeColors.weekDayTileColor,
+        borderRadius: BorderRadius.circular(8.0), // Add rounded corners
         border: widget.displayBorder
             ? Border.all(
                 color: widget.borderColor ?? themeColors.weekDayBorderColor,
