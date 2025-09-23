@@ -1,14 +1,17 @@
 ![Calendar View](https://raw.githubusercontent.com/SimformSolutionsPvtLtd/flutter_calendar_view/master/readme_assets/plugin_banner.png)
 
-# Calendar View
+# Flutter Calendar
 
-[![calendar_view](https://img.shields.io/pub/v/calendar_view?label=calendar_view)](https://pub.dev/packages/calendar_view)
-[![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/SimformSolutionsPvtLtd/flutter_calendar_view/blob/main/LICENSE)
+[![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/Mozahir1/flutter_calendar/blob/main/LICENSE)
 
+A Flutter package that allows you to easily implement all calendar UI and calendar event functionality in your application with enhanced American date formatting and consistent week display.
 
-A Flutter package that allows you to easily implement all calendar UI and calendar event functionality in your application.
+## Enhanced Features
 
-_Check out other amazing open-source [Flutter libraries](https://pub.dev/publishers/simform.com/packages) and [Awesome Mobile Libraries](https://github.com/SimformSolutionsPvtLtd/Awesome-Mobile-Libraries) developed by Simform Solutions!_
+- **American Date Formatting**: All headers display dates in m/d/y format with month names
+- **Consistent Week Display**: Month view always starts weeks on Sunday for proper grid alignment
+- **Month Names**: Beautiful month names instead of numbers in all views
+- **Smart Week Headers**: Concise format for same-month weeks (e.g., "September 15-21, 2024")
 
 ## Preview
 
