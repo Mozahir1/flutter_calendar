@@ -10,6 +10,7 @@ class DraggableEventTile<T> extends StatefulWidget {
   final double heightPerMinute;
   final Function(CalendarEventData<T>, DateTime, DateTime)? onEventMoved;
   final Function(CalendarEventData<T>, DateTime, DateTime)? onEventResized;
+  final Function(CalendarEventData<T>, DateTime)? onEventTap;
 
   const DraggableEventTile({
     super.key,
@@ -21,6 +22,7 @@ class DraggableEventTile<T> extends StatefulWidget {
     required this.heightPerMinute,
     this.onEventMoved,
     this.onEventResized,
+    this.onEventTap,
   });
 
   @override
@@ -45,19 +47,24 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
     final colorScheme = theme.colorScheme;
 
     return GestureDetector(
-      onPanStart: (details) {
+      onTap: () {
+        // Tap opens edit menu
+        widget.onEventTap?.call(widget.events.first, widget.date);
+      },
+      onLongPressStart: (details) {
+        // Long press starts drag mode
         _dragStartPosition = details.localPosition;
         _dragStartTime = widget.startDuration;
         setState(() {
           _isDragging = true;
         });
       },
-      onPanUpdate: (details) {
+      onLongPressMoveUpdate: (details) {
         if (_isDragging && _dragStartPosition != null) {
           _handleDrag(details.localPosition);
         }
       },
-      onPanEnd: (details) {
+      onLongPressEnd: (details) {
         if (_isDragging) {
           _finishDrag();
         }

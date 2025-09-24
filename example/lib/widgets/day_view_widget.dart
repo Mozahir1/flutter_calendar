@@ -39,16 +39,7 @@ class DayViewWidget extends StatelessWidget {
         );
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
       },
-      onEventTap: (events, date) {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) => DetailsPage(
-              event: events.first,
-              date: date,
-            ),
-          ),
-        );
-      },
+      // onEventTap is now handled by DraggableEventTile
       onEventLongTap: (events, date) {
         if (events.isNotEmpty) {
           _showEventContextMenu(context, events.first, date);
@@ -132,6 +123,19 @@ class DayViewWidget extends StatelessWidget {
       heightPerMinute: 3.0, // Match the DayView's heightPerMinute
       onEventMoved: (event, start, end) => _handleEventMoved(context, event, start, end),
       onEventResized: (event, start, end) => _handleEventResized(context, event, start, end),
+      onEventTap: (event, date) => _handleEventTap(context, event, date),
+    );
+  }
+
+  /// Handles when an event is tapped (opens edit menu)
+  void _handleEventTap(BuildContext context, CalendarEventData event, DateTime date) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => DetailsPage(
+          event: event,
+          date: date,
+        ),
+      ),
     );
   }
 
