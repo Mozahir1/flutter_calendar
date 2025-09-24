@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../pages/event_details_page.dart';
 import '../pages/create_event_page.dart';
 import '../extension.dart';
+import 'draggable_event_tile.dart';
 
 class DayViewWidget extends StatelessWidget {
   final GlobalKey<DayViewState>? state;
@@ -24,6 +25,8 @@ class DayViewWidget extends StatelessWidget {
       showHalfHours: true,
       heightPerMinute: 3,
       timeLineBuilder: _timeLineBuilder,
+      eventTileBuilder: (date, events, boundary, startDuration, endDuration) => 
+          _buildDraggableEventTile(context, date, events, boundary, startDuration, endDuration),
       scrollPhysics: const BouncingScrollPhysics(),
       eventArranger: FullWidthEventArranger(),
       showQuarterHours: false,
@@ -109,6 +112,97 @@ class DayViewWidget extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  /// Builds a draggable and resizable event tile
+  Widget _buildDraggableEventTile(
+    BuildContext context,
+    DateTime date,
+    List<CalendarEventData> events,
+    Rect boundary,
+    DateTime startDuration,
+    DateTime endDuration,
+  ) {
+    return DraggableEventTile(
+      date: date,
+      events: events,
+      boundary: boundary,
+      startDuration: startDuration,
+      endDuration: endDuration,
+      onEventMoved: (event, start, end) => _handleEventMoved(context, event, start, end),
+      onEventResized: (event, start, end) => _handleEventResized(context, event, start, end),
+    );
+  }
+
+  /// Handles when an event is moved to a new time
+  void _handleEventMoved(BuildContext context, CalendarEventData event, DateTime newStartTime, DateTime newEndTime) {
+    final controller = CalendarControllerProvider.of(context).controller;
+    
+    // Remove the old event
+    controller.remove(event);
+    
+    // Create new event with updated times
+    final updatedEvent = CalendarEventData(
+      title: event.title,
+      description: event.description,
+      date: newStartTime,
+      startTime: newStartTime,
+      endTime: newEndTime,
+      color: event.color,
+      titleStyle: event.titleStyle,
+      descriptionStyle: event.descriptionStyle,
+    );
+    
+    // Add the updated event
+    controller.add(updatedEvent);
+    
+    // Show feedback
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Event moved to ${_formatTime(newStartTime)}'),
+        duration: const Duration(seconds: 1),
+      ),
+    );
+  }
+
+  /// Handles when an event is resized to a new duration
+  void _handleEventResized(BuildContext context, CalendarEventData event, DateTime startTime, DateTime newEndTime) {
+    final controller = CalendarControllerProvider.of(context).controller;
+    
+    // Remove the old event
+    controller.remove(event);
+    
+    // Create new event with updated end time
+    final updatedEvent = CalendarEventData(
+      title: event.title,
+      description: event.description,
+      date: startTime,
+      startTime: startTime,
+      endTime: newEndTime,
+      color: event.color,
+      titleStyle: event.titleStyle,
+      descriptionStyle: event.descriptionStyle,
+    );
+    
+    // Add the updated event
+    controller.add(updatedEvent);
+    
+    // Show feedback
+    final duration = newEndTime.difference(startTime);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Event duration: ${duration.inMinutes} minutes'),
+        duration: const Duration(seconds: 1),
+      ),
+    );
+  }
+
+  /// Formats time for display
+  String _formatTime(DateTime time) {
+    final hour = time.hour == 0 ? 12 : (time.hour > 12 ? time.hour - 12 : time.hour);
+    final minute = time.minute.toString().padLeft(2, '0');
+    final period = time.hour >= 12 ? 'PM' : 'AM';
+    return '$hour:$minute $period';
   }
 
   /// Shows a quick event creation dialog when user long presses on calendar
