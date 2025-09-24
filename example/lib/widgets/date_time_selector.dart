@@ -2,6 +2,7 @@ import 'package:calendar_view/calendar_view.dart';
 import 'package:flutter/material.dart';
 
 import '../extension.dart';
+import 'apple_style_time_picker.dart';
 
 typedef Validator = String? Function(String? value);
 
@@ -161,11 +162,8 @@ class _DateTimeSelectorFormFieldState extends State<DateTimeSelectorFormField> {
   Future<DateTime?> _showTimeSelector() async {
     final now = _selectedDate ?? DateTime.now();
 
-    final time = await showTimePicker(
+    final time = await showAppleStyleTimePicker(
       context: context,
-      builder: (context, widget) {
-        return widget ?? SizedBox.shrink();
-      },
       initialTime: TimeOfDay.fromDateTime(now),
     );
 
