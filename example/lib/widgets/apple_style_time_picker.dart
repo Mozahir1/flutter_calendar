@@ -22,6 +22,9 @@ class _AppleStyleTimePickerState extends State<AppleStyleTimePicker> {
   late int _selectedHour;
   late int _selectedMinute;
   late bool _isAM;
+  
+  static const int _centerOffset = 50; // Center position in the list
+  static const int _listSize = 100; // Small list size
 
   @override
   void initState() {
@@ -32,18 +35,37 @@ class _AppleStyleTimePickerState extends State<AppleStyleTimePicker> {
     _selectedMinute = widget.initialTime.minute;
     _isAM = widget.initialTime.period == DayPeriod.am;
     
-    // Initialize controllers with current values centered in a large range
-    _hourController = FixedExtentScrollController(initialItem: 500 + _selectedHour - 1);
-    _minuteController = FixedExtentScrollController(initialItem: 500 + _selectedMinute);
-    _periodController = FixedExtentScrollController(initialItem: 500 + (_isAM ? 0 : 1));
+    // Initialize controllers with current values at center
+    _hourController = FixedExtentScrollController(initialItem: _centerOffset + _selectedHour - 1);
+    _minuteController = FixedExtentScrollController(initialItem: _centerOffset + _selectedMinute);
+    _periodController = FixedExtentScrollController(initialItem: _centerOffset + (_isAM ? 0 : 1));
+    
+    // Add listeners to handle infinite scrolling
+    _hourController.addListener(() => _handleInfiniteScroll(_hourController, 12, _centerOffset));
+    _minuteController.addListener(() => _handleInfiniteScroll(_minuteController, 60, _centerOffset));
+    _periodController.addListener(() => _handleInfiniteScroll(_periodController, 2, _centerOffset));
   }
 
   @override
   void dispose() {
+    _hourController.removeListener(() => _handleInfiniteScroll(_hourController, 12, _centerOffset));
+    _minuteController.removeListener(() => _handleInfiniteScroll(_minuteController, 60, _centerOffset));
+    _periodController.removeListener(() => _handleInfiniteScroll(_periodController, 2, _centerOffset));
     _hourController.dispose();
     _minuteController.dispose();
     _periodController.dispose();
     super.dispose();
+  }
+
+  void _handleInfiniteScroll(FixedExtentScrollController controller, int cycle, int centerOffset) {
+    final currentIndex = controller.selectedItem;
+    
+    // If user has scrolled too far from center, reposition
+    if (currentIndex < centerOffset - cycle || currentIndex > centerOffset + cycle) {
+      // Calculate the equivalent position near center
+      final equivalentIndex = centerOffset + (currentIndex % cycle);
+      controller.jumpToItem(equivalentIndex);
+    }
   }
 
   void _onTimeChanged() {
@@ -193,7 +215,7 @@ class _AppleStyleTimePickerState extends State<AppleStyleTimePicker> {
         physics: const FixedExtentScrollPhysics(),
         onSelectedItemChanged: onSelectedItemChanged,
         childDelegate: ListWheelChildBuilderDelegate(
-          childCount: 10000, // Very large number to simulate truly infinite scrolling
+          childCount: _listSize, // Small list size with auto-repositioning
           builder: itemBuilder,
         ),
       ),
