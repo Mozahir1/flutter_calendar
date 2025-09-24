@@ -510,6 +510,108 @@ class CalendarData<T extends Object?> {
             currentDate.isAtSameMomentAs(recurrenceEndDate));
   }
 
+  /// Handles recurrence logic for multi-day events.
+  /// For multi-day events, we need to check if the current date falls within
+  /// the recurring event's date range, not just if it matches the start date.
+  bool _handleRecurrenceForMultiDay({
+    required DateTime currentDate,
+    required DateTime eventStartDate,
+    required DateTime eventEndDate,
+    required RecurrenceSettings recurrenceSettings,
+  }) {
+    // Calculate the duration of the original event
+    final eventDuration = eventEndDate.difference(eventStartDate).inDays;
+    
+    // Find the recurrence start date that contains the current date
+    DateTime? recurrenceStartDate;
+    
+    switch (recurrenceSettings.frequency) {
+      case RepeatFrequency.doNotRepeat:
+        return currentDate.isAtSameMomentAs(eventStartDate);
+        
+      case RepeatFrequency.daily:
+        // For daily recurrence, find the most recent start date
+        if (currentDate.isBefore(eventStartDate)) return false;
+        
+        final daysSinceStart = currentDate.difference(eventStartDate).inDays;
+        recurrenceStartDate = eventStartDate.add(Duration(days: daysSinceStart));
+        break;
+        
+      case RepeatFrequency.weekly:
+        // For weekly recurrence, find the most recent start date that matches the weekday
+        if (currentDate.isBefore(eventStartDate)) return false;
+        
+        final startWeekday = eventStartDate.weekday;
+        final currentWeekday = currentDate.weekday;
+        
+        // Calculate days to subtract to get to the most recent occurrence
+        int daysToSubtract = (currentWeekday - startWeekday) % 7;
+        if (daysToSubtract < 0) daysToSubtract += 7;
+        
+        recurrenceStartDate = currentDate.subtract(Duration(days: daysToSubtract));
+        break;
+        
+      case RepeatFrequency.monthly:
+        // For monthly recurrence, find the most recent start date that matches the day
+        if (currentDate.isBefore(eventStartDate)) return false;
+        
+        final startDay = eventStartDate.day;
+        final currentDay = currentDate.day;
+        
+        if (currentDay >= startDay) {
+          // Current month
+          recurrenceStartDate = DateTime(currentDate.year, currentDate.month, startDay);
+        } else {
+          // Previous month
+          final prevMonth = currentDate.month == 1 ? 12 : currentDate.month - 1;
+          final prevYear = currentDate.month == 1 ? currentDate.year - 1 : currentDate.year;
+          recurrenceStartDate = DateTime(prevYear, prevMonth, startDay);
+        }
+        break;
+        
+      case RepeatFrequency.yearly:
+        // For yearly recurrence, find the most recent start date that matches the month and day
+        if (currentDate.isBefore(eventStartDate)) return false;
+        
+        final startMonth = eventStartDate.month;
+        final startDay = eventStartDate.day;
+        
+        if (currentDate.month > startMonth || 
+            (currentDate.month == startMonth && currentDate.day >= startDay)) {
+          // Current year
+          recurrenceStartDate = DateTime(currentDate.year, startMonth, startDay);
+        } else {
+          // Previous year
+          recurrenceStartDate = DateTime(currentDate.year - 1, startMonth, startDay);
+        }
+        break;
+    }
+    
+    if (recurrenceStartDate == null) return false;
+    
+    // Check if the current date falls within the recurring event's date range
+    final recurrenceEndDate = recurrenceStartDate.add(Duration(days: eventDuration));
+    
+    // Check if the current date is within the recurrence date range
+    final isWithinRange = currentDate.isAtSameMomentAs(recurrenceStartDate) ||
+        currentDate.isAtSameMomentAs(recurrenceEndDate) ||
+        (currentDate.isAfter(recurrenceStartDate) && currentDate.isBefore(recurrenceEndDate));
+    
+    if (!isWithinRange) return false;
+    
+    // Check if this recurrence is excluded
+    if (_isExcluded(recurrenceSettings, currentDate)) return false;
+    
+    // Check if the recurrence end date is within the recurrence settings end date
+    final recurrenceSettingsEndDate = recurrenceSettings.endDate;
+    if (recurrenceSettingsEndDate != null && 
+        recurrenceStartDate.isAfter(recurrenceSettingsEndDate)) {
+      return false;
+    }
+    
+    return true;
+  }
+
   bool _handleRecurrence({
     required DateTime currentDate,
     required DateTime eventStartDate,
@@ -554,7 +656,7 @@ class CalendarData<T extends Object?> {
       events.addAll(_singleDayEvents[date]!);
     }
 
-    // TODO(Shubham): Add recurrence support for ranging events
+    // Add non-recurring ranging events
     for (final rangingEvent in _rangingEventList) {
       if (rangingEvent.occursOnDate(date)) {
         events.add(rangingEvent);
@@ -570,6 +672,12 @@ class CalendarData<T extends Object?> {
         .where((event) => (!event.isFullDayEvent && !event.isRangingEvent))
         .toList();
     events.addAll(recurringEvents);
+
+    // Add recurring ranging events
+    final recurringRangingEvents = getRecurringEventsOnDay(date)
+        .where((event) => event.isRangingEvent)
+        .toList();
+    events.addAll(recurringRangingEvents);
 
     // Inside event arranger we require all the events to be sorted
     // based on start time.
@@ -597,12 +705,24 @@ class CalendarData<T extends Object?> {
         continue;
       }
 
-      final isRecurrence = _handleRecurrence(
-        currentDate: date,
-        eventStartDate: event.date,
-        eventEndDate: event.endDate,
-        recurrenceSettings: recurrenceSettings,
-      );
+      bool isRecurrence;
+      
+      // Use different logic for ranging events vs single-day events
+      if (event.isRangingEvent) {
+        isRecurrence = _handleRecurrenceForMultiDay(
+          currentDate: date,
+          eventStartDate: event.date,
+          eventEndDate: event.endDate,
+          recurrenceSettings: recurrenceSettings,
+        );
+      } else {
+        isRecurrence = _handleRecurrence(
+          currentDate: date,
+          eventStartDate: event.date,
+          eventEndDate: event.endDate,
+          recurrenceSettings: recurrenceSettings,
+        );
+      }
 
       if (isRecurrence) {
         events.add(event);
