@@ -21,7 +21,7 @@ class AppConstants {
         errorBorder: inputBorder.copyWith(
           borderSide: BorderSide(
             width: 2,
-            color: AppColors.red,
+            color: AppColors.primary,
           ),
         ),
         enabledBorder: inputBorder,
@@ -41,7 +41,7 @@ class AppConstants {
           fontSize: 17,
         ),
         errorStyle: TextStyle(
-          color: AppColors.red,
+          color: AppColors.primary,
           fontSize: 12,
         ),
         contentPadding: EdgeInsets.symmetric(

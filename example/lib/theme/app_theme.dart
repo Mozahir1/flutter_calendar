@@ -14,7 +14,7 @@ class AppTheme {
     errorBorder: AppConstants.inputBorder.copyWith(
       borderSide: const BorderSide(
         width: 2,
-        color: AppColors.red,
+        color: AppColors.primary,
       ),
     ),
     enabledBorder: AppConstants.inputBorder,
@@ -38,7 +38,7 @@ class AppTheme {
       fontSize: 17,
     ),
     errorStyle: const TextStyle(
-      color: AppColors.red,
+      color: AppColors.primary,
       fontSize: 12,
     ),
     contentPadding: const EdgeInsets.symmetric(

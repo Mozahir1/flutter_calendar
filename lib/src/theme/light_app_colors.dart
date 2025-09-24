@@ -3,12 +3,12 @@ import 'dart:ui';
 class LightAppColors {
   LightAppColors();
 
-  static const Color primary = Color(0xffEF5366);
+  static const Color primary = Color(0xff2196F3); // Blue primary
   static const Color onPrimary = Color(0xffffffff);
-  static const Color surfaceContainerHigh = Color(0xfff6e4e4);
-  static const Color outlineVariant = Color(0xffd7c1c2);
-  static const Color onSurface = Color(0xff22191a);
+  static const Color surfaceContainerHigh = Color(0xffe3f2fd); // Light blue
+  static const Color outlineVariant = Color(0xffb3d9ff); // Light blue outline
+  static const Color onSurface = Color(0xff191a22); // Dark blue-gray
   static const Color surfaceContainerLowest = Color(0xffffffff);
-  static const Color surfaceContainerLow = Color(0xfffff0f0);
-  static const Color surfaceContainerHighest = Color(0xfff0dede);
+  static const Color surfaceContainerLow = Color(0xfff0f8ff); // Very light blue
+  static const Color surfaceContainerHighest = Color(0xffe1f5fe); // Light blue
 }
