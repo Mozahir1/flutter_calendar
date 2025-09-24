@@ -69,17 +69,16 @@ class _AppleStyleTimePickerState extends State<AppleStyleTimePicker> {
         children: [
           // Hour picker
           Expanded(
-            child: _buildPicker(
+            child: _buildInfinitePicker(
               controller: _hourController,
-              itemCount: 12,
               onSelectedItemChanged: (index) {
                 setState(() {
-                  _selectedHour = index + 1;
+                  _selectedHour = (index % 12) + 1;
                 });
                 _onTimeChanged();
               },
               itemBuilder: (context, index) {
-                final hour = index + 1;
+                final hour = (index % 12) + 1;
                 final isSelected = hour == _selectedHour;
                 return Container(
                   alignment: Alignment.center,
@@ -112,17 +111,16 @@ class _AppleStyleTimePickerState extends State<AppleStyleTimePicker> {
           
           // Minute picker
           Expanded(
-            child: _buildPicker(
+            child: _buildInfinitePicker(
               controller: _minuteController,
-              itemCount: 60,
               onSelectedItemChanged: (index) {
                 setState(() {
-                  _selectedMinute = index;
+                  _selectedMinute = index % 60;
                 });
                 _onTimeChanged();
               },
               itemBuilder: (context, index) {
-                final minute = index;
+                final minute = index % 60;
                 final isSelected = minute == _selectedMinute;
                 return Container(
                   alignment: Alignment.center,
@@ -141,18 +139,17 @@ class _AppleStyleTimePickerState extends State<AppleStyleTimePicker> {
           
           // AM/PM picker
           Expanded(
-            child: _buildPicker(
+            child: _buildInfinitePicker(
               controller: _periodController,
-              itemCount: 2,
               onSelectedItemChanged: (index) {
                 setState(() {
-                  _isAM = index == 0;
+                  _isAM = index % 2 == 0;
                 });
                 _onTimeChanged();
               },
               itemBuilder: (context, index) {
-                final period = index == 0 ? 'AM' : 'PM';
-                final isSelected = (index == 0) == _isAM;
+                final period = index % 2 == 0 ? 'AM' : 'PM';
+                final isSelected = (index % 2 == 0) == _isAM;
                 return Container(
                   alignment: Alignment.center,
                   child: Text(
@@ -172,9 +169,8 @@ class _AppleStyleTimePickerState extends State<AppleStyleTimePicker> {
     );
   }
 
-  Widget _buildPicker({
+  Widget _buildInfinitePicker({
     required FixedExtentScrollController controller,
-    required int itemCount,
     required ValueChanged<int> onSelectedItemChanged,
     required Widget Function(BuildContext, int) itemBuilder,
   }) {
@@ -197,7 +193,7 @@ class _AppleStyleTimePickerState extends State<AppleStyleTimePicker> {
         physics: const FixedExtentScrollPhysics(),
         onSelectedItemChanged: onSelectedItemChanged,
         childDelegate: ListWheelChildBuilderDelegate(
-          childCount: itemCount,
+          childCount: 1000, // Large number to simulate infinite scrolling
           builder: itemBuilder,
         ),
       ),
