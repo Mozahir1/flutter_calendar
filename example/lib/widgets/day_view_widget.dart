@@ -59,7 +59,7 @@ class DayViewWidget extends StatelessWidget {
       timeLineWidth: 65,
       showLiveTimeLineInAllDays: true,
       liveTimeIndicatorSettings: LiveTimeIndicatorSettings(
-        color: Colors.redAccent,
+        color: Colors.blueAccent,
         showBullet: false,
         showTime: true,
         showTimeBackgroundView: true,
@@ -246,8 +246,8 @@ class DayViewWidget extends StatelessWidget {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.delete, color: Colors.red),
-                title: const Text('Delete Event', style: TextStyle(color: Colors.red)),
+                leading: const Icon(Icons.delete, color: Colors.blue),
+                title: const Text('Delete Event', style: TextStyle(color: Colors.blue)),
                 onTap: () {
                   Navigator.of(context).pop();
                   _deleteEvent(context, event);
@@ -301,11 +301,11 @@ class DayViewWidget extends StatelessWidget {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text('Event "${event.title}" deleted'),
-                    backgroundColor: Colors.red,
+                    backgroundColor: Colors.blue,
                   ),
                 );
               },
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
               child: const Text('Delete', style: TextStyle(color: Colors.white)),
             ),
           ],
