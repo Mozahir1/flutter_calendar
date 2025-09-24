@@ -32,10 +32,10 @@ class _AppleStyleTimePickerState extends State<AppleStyleTimePicker> {
     _selectedMinute = widget.initialTime.minute;
     _isAM = widget.initialTime.period == DayPeriod.am;
     
-    // Initialize controllers with current values
-    _hourController = FixedExtentScrollController(initialItem: _selectedHour - 1);
-    _minuteController = FixedExtentScrollController(initialItem: _selectedMinute);
-    _periodController = FixedExtentScrollController(initialItem: _isAM ? 0 : 1);
+    // Initialize controllers with current values centered in a large range
+    _hourController = FixedExtentScrollController(initialItem: 500 + _selectedHour - 1);
+    _minuteController = FixedExtentScrollController(initialItem: 500 + _selectedMinute);
+    _periodController = FixedExtentScrollController(initialItem: 500 + (_isAM ? 0 : 1));
   }
 
   @override
@@ -193,7 +193,7 @@ class _AppleStyleTimePickerState extends State<AppleStyleTimePicker> {
         physics: const FixedExtentScrollPhysics(),
         onSelectedItemChanged: onSelectedItemChanged,
         childDelegate: ListWheelChildBuilderDelegate(
-          childCount: 1000, // Large number to simulate infinite scrolling
+          childCount: 10000, // Very large number to simulate truly infinite scrolling
           builder: itemBuilder,
         ),
       ),
