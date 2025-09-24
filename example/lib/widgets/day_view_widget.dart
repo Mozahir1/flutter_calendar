@@ -129,6 +129,7 @@ class DayViewWidget extends StatelessWidget {
       boundary: boundary,
       startDuration: startDuration,
       endDuration: endDuration,
+      heightPerMinute: 3.0, // Match the DayView's heightPerMinute
       onEventMoved: (event, start, end) => _handleEventMoved(context, event, start, end),
       onEventResized: (event, start, end) => _handleEventResized(context, event, start, end),
     );

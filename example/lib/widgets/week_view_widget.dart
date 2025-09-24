@@ -70,6 +70,7 @@ class WeekViewWidget extends StatelessWidget {
       boundary: boundary,
       startDuration: startDuration,
       endDuration: endDuration,
+      heightPerMinute: 1.0, // WeekView default heightPerMinute
       onEventMoved: (event, start, end) => _handleEventMoved(context, event, start, end),
       onEventResized: (event, start, end) => _handleEventResized(context, event, start, end),
     );
