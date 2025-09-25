@@ -21,8 +21,6 @@ class DraggableEventTile<T> extends StatefulWidget {
   final Function(CalendarEventData<T>, DateTime, DateTime, DateTime)? onEventMovedToDay; // Callback for cross-day moves
   
   // Context menu callbacks
-  final Function(CalendarEventData<T>, DateTime)? onEventCut;
-  final Function(CalendarEventData<T>, DateTime)? onEventCopy;
   final Function(CalendarEventData<T>, DateTime)? onEventDuplicate;
   final Function(CalendarEventData<T>, DateTime)? onEventDelete;
 
@@ -40,8 +38,6 @@ class DraggableEventTile<T> extends StatefulWidget {
     this.dayWidth,
     this.weekDates,
     this.onEventMovedToDay,
-    this.onEventCut,
-    this.onEventCopy,
     this.onEventDuplicate,
     this.onEventDelete,
   });
@@ -124,18 +120,6 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
         children: [
           // Context menu - now handled via Overlay
           
-          // Debug: Always show a test context menu for debugging
-          if (false) // Set to true for debugging
-            EventContextMenu<T>(
-              event: event,
-              date: widget.date,
-              position: Offset.zero,
-              onDismiss: () {},
-              onCut: widget.onEventCut,
-              onCopy: widget.onEventCopy,
-              onDuplicate: widget.onEventDuplicate,
-              onDelete: widget.onEventDelete,
-            ),
           
           // Drop preview outline
           if (_showDropPreview && _previewStartTime != null && _previewEndTime != null)
@@ -426,8 +410,6 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
         onDismiss: () {
           overlayEntry.remove();
         },
-        onCut: widget.onEventCut,
-        onCopy: widget.onEventCopy,
         onDuplicate: widget.onEventDuplicate,
         onDelete: widget.onEventDelete,
       ),

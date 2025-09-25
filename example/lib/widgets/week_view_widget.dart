@@ -89,10 +89,8 @@ class WeekViewWidget extends StatelessWidget {
       onEventMovedToDay: (event, start, end, newDate) => _handleEventMovedToDay(context, event, start, end, newDate),
       onEventResized: (event, start, end) => _handleEventResized(context, event, start, end),
       onEventTap: (event, date) => _handleEventTap(context, event, date),
-      onEventCut: (event, date) => _handleEventCut(context, event, date),
-      onEventCopy: (event, date) => _handleEventCopy(context, event, date),
-      onEventDuplicate: (event, date) => _handleEventDuplicate(context, event, date),
-      onEventDelete: (event, date) => _handleEventDelete(context, event, date),
+          onEventDuplicate: (event, date) => _handleEventDuplicate(context, event, date),
+          onEventDelete: (event, date) => _handleEventDelete(context, event, date),
     );
   }
 
@@ -322,34 +320,6 @@ class WeekViewWidget extends StatelessWidget {
     );
   }
 
-  /// Handles cut event action
-  void _handleEventCut(BuildContext context, CalendarEventData event, DateTime date) {
-    print('Week view: Cut event called for ${event.title}');
-    // Store event in clipboard (you could use a global clipboard service)
-    // For now, just show a message
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Event "${event.title}" cut to clipboard'),
-        backgroundColor: Colors.orange,
-      ),
-    );
-    
-    // Remove the event
-    CalendarControllerProvider.of(context).controller.remove(event);
-  }
-
-  /// Handles copy event action
-  void _handleEventCopy(BuildContext context, CalendarEventData event, DateTime date) {
-    print('Week view: Copy event called for ${event.title}');
-    // Store event in clipboard (you could use a global clipboard service)
-    // For now, just show a message
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Event "${event.title}" copied to clipboard'),
-        backgroundColor: Colors.blue,
-      ),
-    );
-  }
 
   /// Handles duplicate event action
   void _handleEventDuplicate(BuildContext context, CalendarEventData event, DateTime date) {

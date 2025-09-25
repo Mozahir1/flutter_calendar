@@ -6,8 +6,6 @@ class EventContextMenu<T extends Object?> extends StatelessWidget {
   final DateTime date;
   final Offset position;
   final VoidCallback onDismiss;
-  final Function(CalendarEventData<T>, DateTime)? onCut;
-  final Function(CalendarEventData<T>, DateTime)? onCopy;
   final Function(CalendarEventData<T>, DateTime)? onDuplicate;
   final Function(CalendarEventData<T>, DateTime)? onDelete;
 
@@ -17,8 +15,6 @@ class EventContextMenu<T extends Object?> extends StatelessWidget {
     required this.date,
     required this.position,
     required this.onDismiss,
-    this.onCut,
-    this.onCopy,
     this.onDuplicate,
     this.onDelete,
   });
@@ -61,26 +57,6 @@ class EventContextMenu<T extends Object?> extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      _buildMenuItem(
-                        context,
-                        icon: Icons.content_cut,
-                        label: 'Cut',
-                        onTap: () {
-                          print('Cut button tapped');
-                          onCut?.call(event, date);
-                          onDismiss();
-                        },
-                      ),
-                      _buildMenuItem(
-                        context,
-                        icon: Icons.content_copy,
-                        label: 'Copy',
-                        onTap: () {
-                          print('Copy button tapped');
-                          onCopy?.call(event, date);
-                          onDismiss();
-                        },
-                      ),
                       _buildMenuItem(
                         context,
                         icon: Icons.content_copy,
