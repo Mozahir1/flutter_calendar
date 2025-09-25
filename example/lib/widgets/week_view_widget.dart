@@ -62,12 +62,17 @@ class WeekViewWidget extends StatelessWidget {
     
     // Calculate more accurate day width
     final screenWidth = MediaQuery.of(context).size.width;
+    // Try different timeline widths to see which one works
     final timelineWidth = 65.0; // WeekView default timeline width
     final availableWidth = screenWidth - timelineWidth;
     final dayWidth = availableWidth / 7; // 7 days in a week
     
+    // Alternative calculation - try using the actual boundary width
+    final alternativeDayWidth = boundary.width;
+    
     // Debug information
     print('Week context: screenWidth=$screenWidth, timelineWidth=$timelineWidth, dayWidth=$dayWidth');
+    print('Alternative dayWidth from boundary: $alternativeDayWidth');
     print('Week dates: $weekDates');
     print('Current date: $date');
     
@@ -78,7 +83,7 @@ class WeekViewWidget extends StatelessWidget {
       startDuration: startDuration,
       endDuration: endDuration,
       heightPerMinute: 1.0, // WeekView default heightPerMinute
-      dayWidth: dayWidth,
+      dayWidth: alternativeDayWidth, // Use the actual boundary width as day width
       weekDates: weekDates,
       onEventMoved: (event, start, end) => _handleEventMoved(context, event, start, end),
       onEventMovedToDay: (event, start, end, newDate) => _handleEventMovedToDay(context, event, start, end, newDate),

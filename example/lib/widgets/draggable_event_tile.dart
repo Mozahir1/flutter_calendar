@@ -268,7 +268,7 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
     });
     
     // Start timer to show preview after hovering for a bit
-    _hoverTimer = Timer(const Duration(milliseconds: 500), () {
+    _hoverTimer = Timer(const Duration(milliseconds: 200), () {
       if (mounted) {
         setState(() {
           _showDropPreview = true;
@@ -302,13 +302,13 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
         
         if (currentDayIndex != -1) {
           // Calculate how many day widths the drag represents
-          // Use a more sensitive calculation - if we drag more than half a day width, move to next day
-          final dayOffset = (_dragOffset!.dx / (widget.dayWidth! / 2)).round();
+          // Use the same calculation as the preview for consistency
+          final dayOffset = (_dragOffset!.dx / widget.dayWidth!).round();
           final newDayIndex = currentDayIndex + dayOffset;
           
           // Debug information
           print('Cross-day drag: dx=${_dragOffset!.dx}, dayWidth=${widget.dayWidth}');
-          print('Day offset calculation: ${_dragOffset!.dx} / ${widget.dayWidth! / 2} = ${_dragOffset!.dx / (widget.dayWidth! / 2)}');
+          print('Day offset calculation: ${_dragOffset!.dx} / ${widget.dayWidth} = ${_dragOffset!.dx / widget.dayWidth!}');
           print('Rounded day offset: $dayOffset, currentDay=$currentDayIndex, newDay=$newDayIndex');
           
           // Ensure the new day index is within bounds
@@ -373,45 +373,37 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
   }
 
   Widget _buildDropPreview() {
-    if (_previewStartTime == null || _previewEndTime == null) {
+    if (_previewStartTime == null || _previewEndTime == null || _dragOffset == null) {
       return const SizedBox.shrink();
     }
 
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    // Calculate preview position relative to the original event position
-    double previewLeft = 0;
-    double previewTop = 0;
+    // Calculate the actual drop position based on the drag offset
+    // This is where the event will actually be placed when dropped
+    double previewLeft = _dragOffset!.dx;
+    double previewTop = _dragOffset!.dy;
 
-    // For week view cross-day dragging, calculate horizontal offset
-    if (widget.dayWidth != null && widget.weekDates != null && _previewDate != null) {
-      final currentDayIndex = widget.weekDates!.indexWhere((d) => 
-        d.year == widget.date.year && 
-        d.month == widget.date.month && 
-        d.day == widget.date.day
-      );
+    // For week view, we need to snap to the grid
+    if (widget.dayWidth != null && widget.weekDates != null) {
+      // Snap horizontal position to day boundaries
+      final dayOffset = (_dragOffset!.dx / widget.dayWidth!).round();
+      previewLeft = dayOffset * widget.dayWidth!;
       
-      final previewDayIndex = widget.weekDates!.indexWhere((d) => 
-        d.year == _previewDate!.year && 
-        d.month == _previewDate!.month && 
-        d.day == _previewDate!.day
-      );
-      
-      if (currentDayIndex != -1 && previewDayIndex != -1) {
-        final dayOffset = previewDayIndex - currentDayIndex;
-        previewLeft = dayOffset * widget.dayWidth!;
-      }
+      // Debug information for day calculation
+      print('Day calculation: dragOffset.dx=${_dragOffset!.dx}, dayWidth=${widget.dayWidth}, dayOffset=$dayOffset, previewLeft=$previewLeft');
     }
 
-    // Calculate vertical position based on time difference
-    final timeDelta = _previewStartTime!.difference(widget.startDuration);
-    final minutesDelta = timeDelta.inMinutes;
-    previewTop = minutesDelta * widget.heightPerMinute;
+    // Snap vertical position to time grid (every 15 minutes)
+    final timeSnapMinutes = 15;
+    final minutesDelta = (_dragOffset!.dy / widget.heightPerMinute).round();
+    final snappedMinutes = (minutesDelta / timeSnapMinutes).round() * timeSnapMinutes;
+    previewTop = snappedMinutes * widget.heightPerMinute;
 
     // Debug information
-    print('Preview calculation: currentDay=${widget.date.day}, previewDay=${_previewDate?.day}, dayOffset=${previewLeft / (widget.dayWidth ?? 1)}');
-    print('Time calculation: startTime=${widget.startDuration.hour}:${widget.startDuration.minute}, previewTime=${_previewStartTime!.hour}:${_previewStartTime!.minute}, topOffset=$previewTop');
+    print('Preview position: dragOffset=(${_dragOffset!.dx}, ${_dragOffset!.dy}), preview=($previewLeft, $previewTop)');
+    print('Preview time: ${_previewStartTime!.hour}:${_previewStartTime!.minute}, preview date: ${_previewDate?.day}');
     
     return Positioned(
       left: previewLeft,
