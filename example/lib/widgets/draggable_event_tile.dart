@@ -101,15 +101,11 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
       },
       onLongPressStart: (details) {
         // Start long press timer for context menu
-        print('Long press started at: ${details.globalPosition}');
-        print('Context menu callbacks: cut=${widget.onEventCut != null}, copy=${widget.onEventCopy != null}, duplicate=${widget.onEventDuplicate != null}, delete=${widget.onEventDelete != null}');
         _contextMenuPosition = details.globalPosition;
         _longPressTimer = Timer(const Duration(milliseconds: 500), () {
-          print('Long press timer fired, mounted: $mounted, isDragging: $_isDragging');
           if (mounted && !_isDragging) {
             setState(() {
               _showContextMenu = true;
-              print('Context menu should now be visible: $_showContextMenu');
             });
           }
         });
@@ -135,28 +131,23 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
         }
       },
       child: Stack(
-        clipBehavior: Clip.none, // Allow dragging outside bounds
+        clipBehavior: Clip.none, // Allow context menu to extend outside bounds
         children: [
           // Context menu
           if (_showContextMenu && _contextMenuPosition != null)
-            Builder(
-              builder: (context) {
-                print('Rendering context menu at position: $_contextMenuPosition');
-                return EventContextMenu<T>(
-                  event: event,
-                  date: widget.date,
-                  position: _contextMenuPosition!,
-                  onDismiss: () {
-                    setState(() {
-                      _showContextMenu = false;
-                    });
-                  },
-                  onCut: widget.onEventCut,
-                  onCopy: widget.onEventCopy,
-                  onDuplicate: widget.onEventDuplicate,
-                  onDelete: widget.onEventDelete,
-                );
+            EventContextMenu<T>(
+              event: event,
+              date: widget.date,
+              position: _contextMenuPosition!,
+              onDismiss: () {
+                setState(() {
+                  _showContextMenu = false;
+                });
               },
+              onCut: widget.onEventCut,
+              onCopy: widget.onEventCopy,
+              onDuplicate: widget.onEventDuplicate,
+              onDelete: widget.onEventDelete,
             ),
           
           // Debug: Always show a test context menu for debugging

@@ -30,13 +30,13 @@ class EventContextMenu<T extends Object?> extends StatelessWidget {
 
     return Positioned(
       left: 0, // Position relative to the event tile
-      top: -80, // Position above the event tile
+      top: -50, // Position above the event tile
       child: Material(
         elevation: 8,
         borderRadius: BorderRadius.circular(8),
         color: colorScheme.surface,
         child: Container(
-          constraints: const BoxConstraints(minWidth: 120),
+          constraints: const BoxConstraints(minHeight: 40),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
@@ -44,7 +44,7 @@ class EventContextMenu<T extends Object?> extends StatelessWidget {
               width: 1,
             ),
           ),
-          child: Column(
+          child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               _buildMenuItem(
@@ -105,22 +105,22 @@ class EventContextMenu<T extends Object?> extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(8),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Row(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
               icon,
-              size: 18,
+              size: 16,
               color: isDestructive 
                   ? colorScheme.error 
                   : colorScheme.onSurface,
             ),
-            const SizedBox(width: 12),
+            const SizedBox(height: 4),
             Text(
               label,
               style: TextStyle(
-                fontSize: 14,
+                fontSize: 10,
                 color: isDestructive 
                     ? colorScheme.error 
                     : colorScheme.onSurface,
