@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:calendar_view/calendar_view.dart';
 import 'package:flutter/material.dart';
 
@@ -45,6 +46,20 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
   
   // Real-time drag state
   Offset? _dragOffset;
+  
+  // Drop preview state
+  bool _showDropPreview = false;
+  Offset? _previewPosition;
+  DateTime? _previewStartTime;
+  DateTime? _previewEndTime;
+  DateTime? _previewDate;
+  Timer? _hoverTimer;
+
+  @override
+  void dispose() {
+    _hoverTimer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -80,6 +95,10 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
       child: Stack(
         clipBehavior: Clip.none, // Allow dragging outside bounds
         children: [
+          // Drop preview outline
+          if (_showDropPreview && _previewStartTime != null && _previewEndTime != null)
+            _buildDropPreview(),
+          
           // Main event tile
           Positioned(
             left: _isDragging ? (_dragOffset?.dx ?? 0) : 0,
@@ -200,6 +219,9 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
     setState(() {
       _dragOffset = delta;
     });
+    
+    // Calculate preview position and start hover timer
+    _calculatePreviewPosition(delta);
   }
 
   void _handleResize(Offset currentPosition) {
@@ -209,7 +231,59 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
     });
   }
 
+  void _calculatePreviewPosition(Offset dragOffset) {
+    // Cancel any existing timer
+    _hoverTimer?.cancel();
+    
+    // Calculate preview times
+    final minutesDelta = (dragOffset.dy / widget.heightPerMinute).round();
+    final previewStartTime = _dragStartTime!.add(Duration(minutes: minutesDelta));
+    final duration = widget.endDuration.difference(widget.startDuration);
+    final previewEndTime = previewStartTime.add(duration);
+    
+    // Calculate preview date (for week view cross-day dragging)
+    DateTime previewDate = widget.date;
+    if (widget.dayWidth != null && widget.weekDates != null && dragOffset.dx.abs() > 15) {
+      final currentDayIndex = widget.weekDates!.indexWhere((d) => 
+        d.year == widget.date.year && 
+        d.month == widget.date.month && 
+        d.day == widget.date.day
+      );
+      
+      if (currentDayIndex != -1) {
+        final dayOffset = (dragOffset.dx / (widget.dayWidth! / 2)).round();
+        final newDayIndex = currentDayIndex + dayOffset;
+        
+        if (newDayIndex >= 0 && newDayIndex < widget.weekDates!.length) {
+          previewDate = widget.weekDates![newDayIndex];
+        }
+      }
+    }
+    
+    // Update preview state
+    setState(() {
+      _previewStartTime = previewStartTime;
+      _previewEndTime = previewEndTime;
+      _previewDate = previewDate;
+    });
+    
+    // Start timer to show preview after hovering for a bit
+    _hoverTimer = Timer(const Duration(milliseconds: 500), () {
+      if (mounted) {
+        setState(() {
+          _showDropPreview = true;
+        });
+      }
+    });
+  }
+
   void _finishDrag() {
+    // Hide preview and cancel timer
+    _hoverTimer?.cancel();
+    setState(() {
+      _showDropPreview = false;
+    });
+    
     if (_dragOffset != null && _dragStartTime != null) {
       // Calculate time change (vertical movement)
       final minutesDelta = (_dragOffset!.dy / widget.heightPerMinute).round();
@@ -296,5 +370,72 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
     setState(() {
       _isResizing = false;
     });
+  }
+
+  Widget _buildDropPreview() {
+    if (_previewStartTime == null || _previewEndTime == null) {
+      return const SizedBox.shrink();
+    }
+
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    // Calculate preview position relative to the original event position
+    double previewLeft = 0;
+    double previewTop = 0;
+
+    // For week view cross-day dragging, calculate horizontal offset
+    if (widget.dayWidth != null && widget.weekDates != null && _previewDate != null) {
+      final currentDayIndex = widget.weekDates!.indexWhere((d) => 
+        d.year == widget.date.year && 
+        d.month == widget.date.month && 
+        d.day == widget.date.day
+      );
+      
+      final previewDayIndex = widget.weekDates!.indexWhere((d) => 
+        d.year == _previewDate!.year && 
+        d.month == _previewDate!.month && 
+        d.day == _previewDate!.day
+      );
+      
+      if (currentDayIndex != -1 && previewDayIndex != -1) {
+        final dayOffset = previewDayIndex - currentDayIndex;
+        previewLeft = dayOffset * widget.dayWidth!;
+      }
+    }
+
+    // Calculate vertical position based on time difference
+    final timeDelta = _previewStartTime!.difference(widget.startDuration);
+    final minutesDelta = timeDelta.inMinutes;
+    previewTop = minutesDelta * widget.heightPerMinute;
+
+    // Debug information
+    print('Preview calculation: currentDay=${widget.date.day}, previewDay=${_previewDate?.day}, dayOffset=${previewLeft / (widget.dayWidth ?? 1)}');
+    print('Time calculation: startTime=${widget.startDuration.hour}:${widget.startDuration.minute}, previewTime=${_previewStartTime!.hour}:${_previewStartTime!.minute}, topOffset=$previewTop');
+    
+    return Positioned(
+      left: previewLeft,
+      top: previewTop,
+      child: Container(
+        width: widget.boundary.width,
+        height: widget.boundary.height,
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: colorScheme.primary.withValues(alpha: 0.8),
+            width: 2,
+            style: BorderStyle.solid,
+          ),
+          borderRadius: BorderRadius.circular(8),
+          color: colorScheme.primary.withValues(alpha: 0.1),
+        ),
+        child: Center(
+          child: Icon(
+            Icons.add,
+            color: colorScheme.primary,
+            size: 16,
+          ),
+        ),
+      ),
+    );
   }
 }
