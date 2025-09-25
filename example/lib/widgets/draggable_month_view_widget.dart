@@ -63,10 +63,9 @@ class _DraggableMonthViewWidgetState extends State<DraggableMonthViewWidget> {
       onWillAcceptWithDetails: (details) {
         final data = details.data;
         // Only accept if the event is being moved to a different date
-        return data != null && 
-               (data.date.year != date.year || 
-                data.date.month != date.month || 
-                data.date.day != date.day);
+        return data.date.year != date.year || 
+               data.date.month != date.month || 
+               data.date.day != date.day;
       },
       onAcceptWithDetails: (details) {
         _handleEventMovedToDate(details.data, date);

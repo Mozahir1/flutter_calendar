@@ -124,6 +124,10 @@ class DayViewWidget extends StatelessWidget {
       onEventMoved: (event, start, end) => _handleEventMoved(context, event, start, end),
       onEventResized: (event, start, end) => _handleEventResized(context, event, start, end),
       onEventTap: (event, date) => _handleEventTap(context, event, date),
+      onEventCut: (event, date) => _handleEventCut(context, event, date),
+      onEventCopy: (event, date) => _handleEventCopy(context, event, date),
+      onEventDuplicate: (event, date) => _handleEventDuplicate(context, event, date),
+      onEventDelete: (event, date) => _handleEventDelete(context, event, date),
     );
   }
 
@@ -311,6 +315,71 @@ class DayViewWidget extends StatelessWidget {
           ],
         );
       },
+    );
+  }
+
+  /// Handles cut event action
+  void _handleEventCut(BuildContext context, CalendarEventData event, DateTime date) {
+    // Store event in clipboard (you could use a global clipboard service)
+    // For now, just show a message
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Event "${event.title}" cut to clipboard'),
+        backgroundColor: Colors.orange,
+      ),
+    );
+    
+    // Remove the event
+    CalendarControllerProvider.of(context).controller.remove(event);
+  }
+
+  /// Handles copy event action
+  void _handleEventCopy(BuildContext context, CalendarEventData event, DateTime date) {
+    // Store event in clipboard (you could use a global clipboard service)
+    // For now, just show a message
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Event "${event.title}" copied to clipboard'),
+        backgroundColor: Colors.blue,
+      ),
+    );
+  }
+
+  /// Handles duplicate event action
+  void _handleEventDuplicate(BuildContext context, CalendarEventData event, DateTime date) {
+    // Create a duplicate event with the same time but on the same day
+    final duplicatedEvent = CalendarEventData(
+      title: '${event.title} (Copy)',
+      description: event.description,
+      date: event.date,
+      startTime: event.startTime,
+      endTime: event.endTime,
+      color: event.color,
+      titleStyle: event.titleStyle,
+      descriptionStyle: event.descriptionStyle,
+    );
+    
+    // Add the duplicated event
+    CalendarControllerProvider.of(context).controller.add(duplicatedEvent);
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Event "${event.title}" duplicated'),
+        backgroundColor: Colors.green,
+      ),
+    );
+  }
+
+  /// Handles delete event action
+  void _handleEventDelete(BuildContext context, CalendarEventData event, DateTime date) {
+    // Remove the event
+    CalendarControllerProvider.of(context).controller.remove(event);
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Event "${event.title}" deleted'),
+        backgroundColor: Colors.red,
+      ),
     );
   }
 }

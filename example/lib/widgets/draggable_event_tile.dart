@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:calendar_view/calendar_view.dart';
 import 'package:flutter/material.dart';
 
+import 'event_context_menu.dart';
+
 class DraggableEventTile<T> extends StatefulWidget {
   final DateTime date;
   final List<CalendarEventData<T>> events;
@@ -17,6 +19,12 @@ class DraggableEventTile<T> extends StatefulWidget {
   final double? dayWidth; // Width of each day column in week view
   final List<DateTime>? weekDates; // List of dates in the current week
   final Function(CalendarEventData<T>, DateTime, DateTime, DateTime)? onEventMovedToDay; // Callback for cross-day moves
+  
+  // Context menu callbacks
+  final Function(CalendarEventData<T>, DateTime)? onEventCut;
+  final Function(CalendarEventData<T>, DateTime)? onEventCopy;
+  final Function(CalendarEventData<T>, DateTime)? onEventDuplicate;
+  final Function(CalendarEventData<T>, DateTime)? onEventDelete;
 
   const DraggableEventTile({
     super.key,
@@ -32,6 +40,10 @@ class DraggableEventTile<T> extends StatefulWidget {
     this.dayWidth,
     this.weekDates,
     this.onEventMovedToDay,
+    this.onEventCut,
+    this.onEventCopy,
+    this.onEventDuplicate,
+    this.onEventDelete,
   });
 
   @override
@@ -54,10 +66,16 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
   DateTime? _previewEndTime;
   DateTime? _previewDate;
   Timer? _hoverTimer;
+  
+  // Context menu state
+  bool _showContextMenu = false;
+  Offset? _contextMenuPosition;
+  Timer? _longPressTimer;
 
   @override
   void dispose() {
     _hoverTimer?.cancel();
+    _longPressTimer?.cancel();
     super.dispose();
   }
 
@@ -71,23 +89,47 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
 
     return GestureDetector(
       onTap: () {
+        // Hide context menu if showing
+        if (_showContextMenu) {
+          setState(() {
+            _showContextMenu = false;
+          });
+          return;
+        }
         // Tap opens edit menu
         widget.onEventTap?.call(widget.events.first, widget.date);
       },
       onLongPressStart: (details) {
-        // Long press starts drag mode
-        _dragStartPosition = details.localPosition;
-        _dragStartTime = widget.startDuration;
-        setState(() {
-          _isDragging = true;
+        // Start long press timer for context menu
+        print('Long press started at: ${details.globalPosition}');
+        print('Context menu callbacks: cut=${widget.onEventCut != null}, copy=${widget.onEventCopy != null}, duplicate=${widget.onEventDuplicate != null}, delete=${widget.onEventDelete != null}');
+        _contextMenuPosition = details.globalPosition;
+        _longPressTimer = Timer(const Duration(milliseconds: 500), () {
+          print('Long press timer fired, mounted: $mounted, isDragging: $_isDragging');
+          if (mounted && !_isDragging) {
+            setState(() {
+              _showContextMenu = true;
+              print('Context menu should now be visible: $_showContextMenu');
+            });
+          }
         });
       },
       onLongPressMoveUpdate: (details) {
-        if (_isDragging && _dragStartPosition != null) {
+        // If user starts moving, cancel context menu and start dragging
+        if (_longPressTimer?.isActive == true) {
+          _longPressTimer?.cancel();
+          _dragStartPosition = details.localPosition;
+          _dragStartTime = widget.startDuration;
+          setState(() {
+            _isDragging = true;
+            _showContextMenu = false;
+          });
+        } else if (_isDragging && _dragStartPosition != null) {
           _handleDrag(details.localPosition);
         }
       },
       onLongPressEnd: (details) {
+        _longPressTimer?.cancel();
         if (_isDragging) {
           _finishDrag();
         }
@@ -95,6 +137,41 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
       child: Stack(
         clipBehavior: Clip.none, // Allow dragging outside bounds
         children: [
+          // Context menu
+          if (_showContextMenu && _contextMenuPosition != null)
+            Builder(
+              builder: (context) {
+                print('Rendering context menu at position: $_contextMenuPosition');
+                return EventContextMenu<T>(
+                  event: event,
+                  date: widget.date,
+                  position: _contextMenuPosition!,
+                  onDismiss: () {
+                    setState(() {
+                      _showContextMenu = false;
+                    });
+                  },
+                  onCut: widget.onEventCut,
+                  onCopy: widget.onEventCopy,
+                  onDuplicate: widget.onEventDuplicate,
+                  onDelete: widget.onEventDelete,
+                );
+              },
+            ),
+          
+          // Debug: Always show a test context menu for debugging
+          if (false) // Set to true for debugging
+            EventContextMenu<T>(
+              event: event,
+              date: widget.date,
+              position: Offset.zero,
+              onDismiss: () {},
+              onCut: widget.onEventCut,
+              onCopy: widget.onEventCopy,
+              onDuplicate: widget.onEventDuplicate,
+              onDelete: widget.onEventDelete,
+            ),
+          
           // Drop preview outline
           if (_showDropPreview && _previewStartTime != null && _previewEndTime != null)
             _buildDropPreview(),
