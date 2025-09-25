@@ -57,20 +57,19 @@ class _CalendarConfigState extends State<CalendarConfig> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Text(
-                      'Dark mode: ',
+                      'Theme: ',
                       style: TextStyle(
                         fontSize: 20.0,
                         color: color.onSurface,
                       ),
                     ),
-                    Switch(
-                      value: isDarkMode,
-                      onChanged: (value) {
-                        setState(() => isDarkMode = value);
-                        if (widget.onThemeChange != null) {
-                          widget.onThemeChange!(isDarkMode);
-                        }
-                      },
+                    Text(
+                      'Follows System',
+                      style: TextStyle(
+                        fontSize: 16.0,
+                        color: color.onSurface.withOpacity(0.7),
+                        fontStyle: FontStyle.italic,
+                      ),
                     ),
                   ],
                 ),

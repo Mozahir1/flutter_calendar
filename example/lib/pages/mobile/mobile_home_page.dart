@@ -19,7 +19,6 @@ class MobileHomePage extends StatefulWidget {
 }
 
 class _MobileHomePageState extends State<MobileHomePage> {
-  bool isDarkMode = false;
 
   @override
   Widget build(BuildContext context) {
@@ -62,15 +61,17 @@ class _MobileHomePageState extends State<MobileHomePage> {
       ),
       floatingActionButton: FloatingActionButton(
         child: Icon(
-          Icons.dark_mode,
+          Icons.brightness_auto,
           color: context.appColors.onPrimary,
         ),
         onPressed: () {
-          isDarkMode = !isDarkMode;
-          if (widget.onChangeTheme != null) {
-            widget.onChangeTheme!(isDarkMode);
-          }
-          setState(() {});
+          // Show a snackbar to inform user that theme follows system settings
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Theme automatically follows system settings'),
+              duration: Duration(seconds: 2),
+            ),
+          );
         },
       ),
     );
