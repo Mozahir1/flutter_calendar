@@ -68,7 +68,6 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
   Timer? _hoverTimer;
   
   // Context menu state
-  bool _showContextMenu = false;
   Offset? _contextMenuPosition;
   Timer? _longPressTimer;
 
@@ -89,13 +88,6 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
 
     return GestureDetector(
       onTap: () {
-        // Hide context menu if showing
-        if (_showContextMenu) {
-          setState(() {
-            _showContextMenu = false;
-          });
-          return;
-        }
         // Tap opens edit menu
         widget.onEventTap?.call(widget.events.first, widget.date);
       },
@@ -104,9 +96,7 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
         _contextMenuPosition = details.globalPosition;
         _longPressTimer = Timer(const Duration(milliseconds: 500), () {
           if (mounted && !_isDragging) {
-            setState(() {
-              _showContextMenu = true;
-            });
+            _showContextMenuOverlay();
           }
         });
       },
@@ -118,7 +108,6 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
           _dragStartTime = widget.startDuration;
           setState(() {
             _isDragging = true;
-            _showContextMenu = false;
           });
         } else if (_isDragging && _dragStartPosition != null) {
           _handleDrag(details.localPosition);
@@ -133,22 +122,7 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
       child: Stack(
         clipBehavior: Clip.none, // Allow context menu to extend outside bounds
         children: [
-          // Context menu
-          if (_showContextMenu && _contextMenuPosition != null)
-            EventContextMenu<T>(
-              event: event,
-              date: widget.date,
-              position: _contextMenuPosition!,
-              onDismiss: () {
-                setState(() {
-                  _showContextMenu = false;
-                });
-              },
-              onCut: widget.onEventCut,
-              onCopy: widget.onEventCopy,
-              onDuplicate: widget.onEventDuplicate,
-              onDelete: widget.onEventDelete,
-            ),
+          // Context menu - now handled via Overlay
           
           // Debug: Always show a test context menu for debugging
           if (false) // Set to true for debugging
@@ -438,6 +412,26 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
     setState(() {
       _isResizing = false;
     });
+  }
+
+  void _showContextMenuOverlay() {
+    final overlay = Overlay.of(context);
+    final overlayEntry = OverlayEntry(
+      builder: (context) => EventContextMenu<T>(
+        event: widget.events.first,
+        date: widget.date,
+        position: _contextMenuPosition!,
+        onDismiss: () {
+          overlayEntry.remove();
+        },
+        onCut: widget.onEventCut,
+        onCopy: widget.onEventCopy,
+        onDuplicate: widget.onEventDuplicate,
+        onDelete: widget.onEventDelete,
+      ),
+    );
+    
+    overlay.insert(overlayEntry);
   }
 
   Widget _buildDropPreview() {

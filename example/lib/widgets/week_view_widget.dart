@@ -324,6 +324,7 @@ class WeekViewWidget extends StatelessWidget {
 
   /// Handles cut event action
   void _handleEventCut(BuildContext context, CalendarEventData event, DateTime date) {
+    print('Week view: Cut event called for ${event.title}');
     // Store event in clipboard (you could use a global clipboard service)
     // For now, just show a message
     ScaffoldMessenger.of(context).showSnackBar(
@@ -339,6 +340,7 @@ class WeekViewWidget extends StatelessWidget {
 
   /// Handles copy event action
   void _handleEventCopy(BuildContext context, CalendarEventData event, DateTime date) {
+    print('Week view: Copy event called for ${event.title}');
     // Store event in clipboard (you could use a global clipboard service)
     // For now, just show a message
     ScaffoldMessenger.of(context).showSnackBar(
@@ -351,6 +353,7 @@ class WeekViewWidget extends StatelessWidget {
 
   /// Handles duplicate event action
   void _handleEventDuplicate(BuildContext context, CalendarEventData event, DateTime date) {
+    print('Week view: Duplicate event called for ${event.title}');
     // Create a duplicate event with the same time but on the same day
     final duplicatedEvent = CalendarEventData(
       title: '${event.title} (Copy)',
@@ -376,6 +379,7 @@ class WeekViewWidget extends StatelessWidget {
 
   /// Handles delete event action
   void _handleEventDelete(BuildContext context, CalendarEventData event, DateTime date) {
+    print('Week view: Delete event called for ${event.title}');
     // Remove the event
     CalendarControllerProvider.of(context).controller.remove(event);
     

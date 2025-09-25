@@ -320,6 +320,7 @@ class DayViewWidget extends StatelessWidget {
 
   /// Handles cut event action
   void _handleEventCut(BuildContext context, CalendarEventData event, DateTime date) {
+    print('Day view: Cut event called for ${event.title}');
     // Store event in clipboard (you could use a global clipboard service)
     // For now, just show a message
     ScaffoldMessenger.of(context).showSnackBar(
@@ -335,6 +336,7 @@ class DayViewWidget extends StatelessWidget {
 
   /// Handles copy event action
   void _handleEventCopy(BuildContext context, CalendarEventData event, DateTime date) {
+    print('Day view: Copy event called for ${event.title}');
     // Store event in clipboard (you could use a global clipboard service)
     // For now, just show a message
     ScaffoldMessenger.of(context).showSnackBar(
@@ -347,6 +349,7 @@ class DayViewWidget extends StatelessWidget {
 
   /// Handles duplicate event action
   void _handleEventDuplicate(BuildContext context, CalendarEventData event, DateTime date) {
+    print('Day view: Duplicate event called for ${event.title}');
     // Create a duplicate event with the same time but on the same day
     final duplicatedEvent = CalendarEventData(
       title: '${event.title} (Copy)',
@@ -372,6 +375,7 @@ class DayViewWidget extends StatelessWidget {
 
   /// Handles delete event action
   void _handleEventDelete(BuildContext context, CalendarEventData event, DateTime date) {
+    print('Day view: Delete event called for ${event.title}');
     // Remove the event
     CalendarControllerProvider.of(context).controller.remove(event);
     
