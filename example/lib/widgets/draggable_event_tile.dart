@@ -416,7 +416,9 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
 
   void _showContextMenuOverlay() {
     final overlay = Overlay.of(context);
-    final overlayEntry = OverlayEntry(
+    late OverlayEntry overlayEntry;
+    
+    overlayEntry = OverlayEntry(
       builder: (context) => EventContextMenu<T>(
         event: widget.events.first,
         date: widget.date,
