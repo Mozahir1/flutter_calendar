@@ -11,6 +11,11 @@ class DraggableEventTile<T> extends StatefulWidget {
   final Function(CalendarEventData<T>, DateTime, DateTime)? onEventMoved;
   final Function(CalendarEventData<T>, DateTime, DateTime)? onEventResized;
   final Function(CalendarEventData<T>, DateTime)? onEventTap;
+  
+  // Week view specific parameters for cross-day dragging
+  final double? dayWidth; // Width of each day column in week view
+  final List<DateTime>? weekDates; // List of dates in the current week
+  final Function(CalendarEventData<T>, DateTime, DateTime, DateTime)? onEventMovedToDay; // Callback for cross-day moves
 
   const DraggableEventTile({
     super.key,
@@ -23,6 +28,9 @@ class DraggableEventTile<T> extends StatefulWidget {
     this.onEventMoved,
     this.onEventResized,
     this.onEventTap,
+    this.dayWidth,
+    this.weekDates,
+    this.onEventMovedToDay,
   });
 
   @override
@@ -203,15 +211,75 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
 
   void _finishDrag() {
     if (_dragOffset != null && _dragStartTime != null) {
-      // Calculate final position and update the event
-      // Use the actual heightPerMinute from the calendar
+      // Calculate time change (vertical movement)
       final minutesDelta = (_dragOffset!.dy / widget.heightPerMinute).round();
-      
       final newStartTime = _dragStartTime!.add(Duration(minutes: minutesDelta));
       final duration = widget.endDuration.difference(widget.startDuration);
       final newEndTime = newStartTime.add(duration);
       
-      // Only call the callback once at the end
+      // Check if this is a cross-day drag (horizontal movement in week view)
+      if (widget.dayWidth != null && widget.weekDates != null && _dragOffset!.dx.abs() > 15) {
+        // Find the current day index in the week
+        final currentDayIndex = widget.weekDates!.indexWhere((d) => 
+          d.year == widget.date.year && 
+          d.month == widget.date.month && 
+          d.day == widget.date.day
+        );
+        
+        if (currentDayIndex != -1) {
+          // Calculate how many day widths the drag represents
+          // Use a more sensitive calculation - if we drag more than half a day width, move to next day
+          final dayOffset = (_dragOffset!.dx / (widget.dayWidth! / 2)).round();
+          final newDayIndex = currentDayIndex + dayOffset;
+          
+          // Debug information
+          print('Cross-day drag: dx=${_dragOffset!.dx}, dayWidth=${widget.dayWidth}');
+          print('Day offset calculation: ${_dragOffset!.dx} / ${widget.dayWidth! / 2} = ${_dragOffset!.dx / (widget.dayWidth! / 2)}');
+          print('Rounded day offset: $dayOffset, currentDay=$currentDayIndex, newDay=$newDayIndex');
+          
+          // Ensure the new day index is within bounds
+          if (newDayIndex >= 0 && newDayIndex < widget.weekDates!.length) {
+            final newDate = widget.weekDates![newDayIndex];
+            
+            // Only proceed if we're actually moving to a different day
+            if (newDate.day != widget.date.day || newDate.month != widget.date.month || newDate.year != widget.date.year) {
+              // Create new start and end times with the new date
+              final newStartTimeWithDate = DateTime(
+                newDate.year,
+                newDate.month,
+                newDate.day,
+                newStartTime.hour,
+                newStartTime.minute,
+              );
+              final newEndTimeWithDate = DateTime(
+                newDate.year,
+                newDate.month,
+                newDate.day,
+                newEndTime.hour,
+                newEndTime.minute,
+              );
+              
+              // Call the cross-day move callback
+              widget.onEventMovedToDay?.call(
+                widget.events.first, 
+                newStartTimeWithDate, 
+                newEndTimeWithDate, 
+                newDate
+              );
+              
+              setState(() {
+                _isDragging = false;
+                _dragOffset = null;
+              });
+              _dragStartPosition = null;
+              _dragStartTime = null;
+              return;
+            }
+          }
+        }
+      }
+      
+      // Regular time-only move (same day)
       widget.onEventMoved?.call(widget.events.first, newStartTime, newEndTime);
     }
     
