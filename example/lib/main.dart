@@ -24,49 +24,48 @@ class _MyAppState extends State<MyApp> {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return CalendarControllerProvider(
-      controller: EventController()..addAll(_events),
-      child: MaterialApp(
-        title: 'Flutter Calendar Page Demo',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.light,
-        darkTheme: AppTheme.dark,
-        themeMode: ThemeMode.system, // Automatically follow system theme
-        scrollBehavior: ScrollBehavior().copyWith(
-          dragDevices: {
-            PointerDeviceKind.trackpad,
-            PointerDeviceKind.mouse,
-            PointerDeviceKind.touch,
-          },
-        ),
-        home: Builder(
-          builder: (context) {
-            // Detect system brightness to determine calendar theme
-            final brightness = MediaQuery.of(context).platformBrightness;
-            final isSystemDarkMode = brightness == Brightness.dark;
-            
-            return CalendarThemeProvider(
-              calendarTheme: CalendarThemeData(
-                monthViewTheme: isSystemDarkMode 
-                    ? MonthViewThemeData.dark() 
-                    : MonthViewThemeData.light(),
-                dayViewTheme: isSystemDarkMode
-                    ? DayViewThemeData.dark()
-                    : DayViewThemeData.light()
-                        .copyWith(hourLineColor: AppColors.primary) as DayViewThemeData,
-                weekViewTheme: isSystemDarkMode 
-                    ? WeekViewThemeData.dark() 
-                    : WeekViewThemeData.light(),
-                multiDayViewTheme: isSystemDarkMode
-                    ? MultiDayViewThemeData.dark()
-                    : MultiDayViewThemeData.light(),
-              ),
-              child: HomePage(
-                onChangeTheme: (isDark) => setState(() => isDarkMode = isDark),
-              ),
-            );
-          },
-        ),
+    return MaterialApp(
+      title: 'Flutter Calendar Page Demo',
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      themeMode: ThemeMode.system, // Automatically follow system theme
+      scrollBehavior: ScrollBehavior().copyWith(
+        dragDevices: {
+          PointerDeviceKind.trackpad,
+          PointerDeviceKind.mouse,
+          PointerDeviceKind.touch,
+        },
+      ),
+      builder: (context, child) {
+        // Detect system brightness to determine calendar theme
+        final brightness = MediaQuery.of(context).platformBrightness;
+        final isSystemDarkMode = brightness == Brightness.dark;
+        
+        return CalendarThemeProvider(
+          calendarTheme: CalendarThemeData(
+            monthViewTheme: isSystemDarkMode 
+                ? MonthViewThemeData.dark() 
+                : MonthViewThemeData.light(),
+            dayViewTheme: isSystemDarkMode
+                ? DayViewThemeData.dark()
+                : DayViewThemeData.light()
+                    .copyWith(hourLineColor: AppColors.primary) as DayViewThemeData,
+            weekViewTheme: isSystemDarkMode 
+                ? WeekViewThemeData.dark() 
+                : WeekViewThemeData.light(),
+            multiDayViewTheme: isSystemDarkMode
+                ? MultiDayViewThemeData.dark()
+                : MultiDayViewThemeData.light(),
+          ),
+          child: CalendarControllerProvider(
+            controller: EventController()..addAll(_events),
+            child: child!,
+          ),
+        );
+      },
+      home: HomePage(
+        onChangeTheme: (isDark) => setState(() => isDarkMode = isDark),
       ),
     );
   }
