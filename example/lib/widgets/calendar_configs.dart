@@ -5,6 +5,7 @@ import '../enumerations.dart';
 import '../extension.dart';
 import '../theme/app_colors.dart';
 import 'add_event_form.dart';
+import '../pages/json_viewer_page.dart';
 
 class CalendarConfig extends StatefulWidget {
   final void Function(CalendarView view) onViewChange;
@@ -114,6 +115,38 @@ class _CalendarConfigState extends State<CalendarConfig> {
                         ),
                       );
                     },
+                  ),
+                ),
+                SizedBox(
+                  height: 40,
+                ),
+                Text(
+                  "Tools:",
+                  style: TextStyle(
+                    fontSize: 20.0,
+                    color: color.onSurface,
+                  ),
+                ),
+                SizedBox(
+                  height: 20,
+                ),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const JsonViewerPage(),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.code),
+                  label: const Text('JSON Viewer'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.navyBlue,
+                    foregroundColor: AppColors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 12,
+                    ),
                   ),
                 ),
                 SizedBox(
