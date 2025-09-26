@@ -1,4 +1,4 @@
-name: flutter_calendar
+name: calendar_view
 description: A Flutter package with enhanced calendar UI featuring American date formatting, month names, and consistent week display.
 version: 2.0.1
 homepage: https://github.com/Mozahir1/flutter_calendar

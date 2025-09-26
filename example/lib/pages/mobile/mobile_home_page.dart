@@ -5,6 +5,8 @@ import '../day_view_page.dart';
 import '../month_view_page.dart';
 import '../multi_day_view_page.dart';
 import '../week_view_page.dart';
+import '../json_viewer_page.dart';
+import '../../examples/enhanced_event_usage_example.dart';
 
 class MobileHomePage extends StatefulWidget {
   MobileHomePage({
@@ -55,6 +57,20 @@ class _MobileHomePageState extends State<MobileHomePage> {
             ElevatedButton(
               onPressed: () => context.pushRoute(MultiDayViewDemo()),
               child: Text("Multi-Day View"),
+            ),
+            SizedBox(
+              height: 20,
+            ),
+            ElevatedButton(
+              onPressed: () => context.pushRoute(EnhancedEventUsageExample()),
+              child: Text("Enhanced Event System"),
+            ),
+            SizedBox(
+              height: 20,
+            ),
+            ElevatedButton(
+              onPressed: () => context.pushRoute(JsonViewerPage()),
+              child: Text("JSON Storage Viewer"),
             ),
           ],
         ),
