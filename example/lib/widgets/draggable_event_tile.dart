@@ -55,21 +55,12 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
   // Real-time drag state
   Offset? _dragOffset;
   
-  // Drop preview state
-  bool _showDropPreview = false;
-  Offset? _previewPosition;
-  DateTime? _previewStartTime;
-  DateTime? _previewEndTime;
-  DateTime? _previewDate;
-  Timer? _hoverTimer;
-  
   // Context menu state
   Offset? _contextMenuPosition;
   Timer? _longPressTimer;
 
   @override
   void dispose() {
-    _hoverTimer?.cancel();
     _longPressTimer?.cancel();
     super.dispose();
   }
@@ -118,13 +109,6 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
       child: Stack(
         clipBehavior: Clip.none, // Allow context menu to extend outside bounds
         children: [
-          // Context menu - now handled via Overlay
-          
-          
-          // Drop preview outline
-          if (_showDropPreview && _previewStartTime != null && _previewEndTime != null)
-            _buildDropPreview(),
-          
           // Main event tile
           Positioned(
             left: _isDragging ? (_dragOffset?.dx ?? 0) : 0,
@@ -245,9 +229,6 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
     setState(() {
       _dragOffset = delta;
     });
-    
-    // Calculate preview position and start hover timer
-    _calculatePreviewPosition(delta);
   }
 
   void _handleResize(Offset currentPosition) {
@@ -257,59 +238,8 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
     });
   }
 
-  void _calculatePreviewPosition(Offset dragOffset) {
-    // Cancel any existing timer
-    _hoverTimer?.cancel();
-    
-    // Calculate preview times
-    final minutesDelta = (dragOffset.dy / widget.heightPerMinute).round();
-    final previewStartTime = _dragStartTime!.add(Duration(minutes: minutesDelta));
-    final duration = widget.endDuration.difference(widget.startDuration);
-    final previewEndTime = previewStartTime.add(duration);
-    
-    // Calculate preview date (for week view cross-day dragging)
-    DateTime previewDate = widget.date;
-    if (widget.dayWidth != null && widget.weekDates != null && dragOffset.dx.abs() > 15) {
-      final currentDayIndex = widget.weekDates!.indexWhere((d) => 
-        d.year == widget.date.year && 
-        d.month == widget.date.month && 
-        d.day == widget.date.day
-      );
-      
-      if (currentDayIndex != -1) {
-        final dayOffset = (dragOffset.dx / (widget.dayWidth! / 2)).round();
-        final newDayIndex = currentDayIndex + dayOffset;
-        
-        if (newDayIndex >= 0 && newDayIndex < widget.weekDates!.length) {
-          previewDate = widget.weekDates![newDayIndex];
-        }
-      }
-    }
-    
-    // Update preview state
-    setState(() {
-      _previewStartTime = previewStartTime;
-      _previewEndTime = previewEndTime;
-      _previewDate = previewDate;
-    });
-    
-    // Start timer to show preview after hovering for a bit
-    _hoverTimer = Timer(const Duration(milliseconds: 200), () {
-      if (mounted) {
-        setState(() {
-          _showDropPreview = true;
-        });
-      }
-    });
-  }
 
   void _finishDrag() {
-    // Hide preview and cancel timer
-    _hoverTimer?.cancel();
-    setState(() {
-      _showDropPreview = false;
-    });
-    
     if (_dragOffset != null && _dragStartTime != null) {
       // Calculate time change (vertical movement)
       final minutesDelta = (_dragOffset!.dy / widget.heightPerMinute).round();
@@ -332,10 +262,6 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
           final dayOffset = (_dragOffset!.dx / widget.dayWidth!).round();
           final newDayIndex = currentDayIndex + dayOffset;
           
-          // Debug information
-          print('Cross-day drag: dx=${_dragOffset!.dx}, dayWidth=${widget.dayWidth}');
-          print('Day offset calculation: ${_dragOffset!.dx} / ${widget.dayWidth} = ${_dragOffset!.dx / widget.dayWidth!}');
-          print('Rounded day offset: $dayOffset, currentDay=$currentDayIndex, newDay=$newDayIndex');
           
           // Ensure the new day index is within bounds
           if (newDayIndex >= 0 && newDayIndex < widget.weekDates!.length) {
@@ -418,62 +344,4 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
     overlay.insert(overlayEntry);
   }
 
-  Widget _buildDropPreview() {
-    if (_previewStartTime == null || _previewEndTime == null || _dragOffset == null) {
-      return const SizedBox.shrink();
-    }
-
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    // Calculate the actual drop position based on the drag offset
-    // This is where the event will actually be placed when dropped
-    double previewLeft = _dragOffset!.dx;
-    double previewTop = _dragOffset!.dy;
-
-    // For week view, we need to snap to the grid
-    if (widget.dayWidth != null && widget.weekDates != null) {
-      // Snap horizontal position to day boundaries
-      final dayOffset = (_dragOffset!.dx / widget.dayWidth!).round();
-      previewLeft = dayOffset * widget.dayWidth!;
-      
-      // Debug information for day calculation
-      print('Day calculation: dragOffset.dx=${_dragOffset!.dx}, dayWidth=${widget.dayWidth}, dayOffset=$dayOffset, previewLeft=$previewLeft');
-    }
-
-    // Snap vertical position to time grid (every 15 minutes)
-    final timeSnapMinutes = 15;
-    final minutesDelta = (_dragOffset!.dy / widget.heightPerMinute).round();
-    final snappedMinutes = (minutesDelta / timeSnapMinutes).round() * timeSnapMinutes;
-    previewTop = snappedMinutes * widget.heightPerMinute;
-
-    // Debug information
-    print('Preview position: dragOffset=(${_dragOffset!.dx}, ${_dragOffset!.dy}), preview=($previewLeft, $previewTop)');
-    print('Preview time: ${_previewStartTime!.hour}:${_previewStartTime!.minute}, preview date: ${_previewDate?.day}');
-    
-    return Positioned(
-      left: previewLeft,
-      top: previewTop,
-      child: Container(
-        width: widget.boundary.width,
-        height: widget.boundary.height,
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: colorScheme.primary.withValues(alpha: 0.8),
-            width: 2,
-            style: BorderStyle.solid,
-          ),
-          borderRadius: BorderRadius.circular(8),
-          color: colorScheme.primary.withValues(alpha: 0.1),
-        ),
-        child: Center(
-          child: Icon(
-            Icons.add,
-            color: colorScheme.primary,
-            size: 16,
-          ),
-        ),
-      ),
-    );
-  }
 }
