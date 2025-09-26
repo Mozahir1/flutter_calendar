@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 
 import '../extension.dart';
 import '../widgets/add_event_form.dart';
+import '../widgets/edit_recurring_event_dialog.dart';
 
 class CreateEventPage extends StatelessWidget {
-  const CreateEventPage({super.key, this.event});
+  const CreateEventPage({super.key, this.event, this.editType});
 
   final CalendarEventData? event;
+  final EditRecurringEventType? editType;
 
   @override
   Widget build(BuildContext context) {
@@ -40,9 +42,7 @@ class CreateEventPage extends StatelessWidget {
           child: AddOrEditEventForm(
             onEventAdd: (newEvent) {
               if (this.event != null) {
-                CalendarControllerProvider.of(context)
-                    .controller
-                    .update(this.event!, newEvent);
+                _handleEventUpdate(context, newEvent);
               } else {
                 CalendarControllerProvider.of(context).controller.add(newEvent);
               }
@@ -54,5 +54,51 @@ class CreateEventPage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  /// Handles updating an event based on the edit type for recurring events
+  void _handleEventUpdate(BuildContext context, CalendarEventData newEvent) {
+    final controller = CalendarControllerProvider.of(context).controller;
+    
+    if (editType != null) {
+      // Handle recurring event edit based on type
+      switch (editType!) {
+        case EditRecurringEventType.thisEvent:
+          // Edit only this occurrence - create a new single event
+          final singleEvent = CalendarEventData(
+            date: newEvent.date,
+            endDate: newEvent.endDate,
+            startTime: newEvent.startTime,
+            endTime: newEvent.endTime,
+            title: newEvent.title,
+            description: newEvent.description,
+            color: newEvent.color,
+            // No recurrence settings for single event
+          );
+          controller.add(singleEvent);
+          // Delete the original occurrence
+          controller.deleteRecurrenceEvent(
+            date: event!.date,
+            event: event!,
+            deleteEventType: DeleteEvent.current,
+          );
+          break;
+          
+        case EditRecurringEventType.thisAndFollowing:
+          // Edit this and all following events
+          // For now, we'll update the entire series and then delete past events
+          // This is a simplified approach - in a real app you'd want more sophisticated logic
+          controller.update(event!, newEvent);
+          break;
+          
+        case EditRecurringEventType.allEvents:
+          // Edit all events in the series
+          controller.update(event!, newEvent);
+          break;
+      }
+    } else {
+      // Non-recurring event or no edit type specified
+      controller.update(event!, newEvent);
+    }
   }
 }

@@ -1,6 +1,7 @@
 import 'package:calendar_view/calendar_view.dart';
 import 'package:example/theme/app_colors.dart';
 import 'package:example/widgets/delete_event_dialog.dart';
+import 'package:example/widgets/edit_recurring_event_dialog.dart';
 import 'package:flutter/material.dart';
 
 import '../extension.dart';
@@ -123,17 +124,7 @@ class DetailsPage extends StatelessWidget {
                     ),
                   ),
                   onPressed: () async {
-                    final result = await Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => CreateEventPage(
-                          event: event,
-                        ),
-                      ),
-                    );
-
-                    if (result != null) {
-                      Navigator.of(context).pop();
-                    }
+                    await _handleEditEvent(context);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white70,
@@ -145,6 +136,48 @@ class DetailsPage extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  /// Handles the editing of an event, showing a dialog for recurring events.
+  ///
+  /// This method checks if the event is a recurring event. If it is, it shows
+  /// a dialog to the user to choose the edit type (e.g., edit this event only,
+  /// edit this and following events, edit all events).
+  /// If the event is not recurring, it directly opens the edit form.
+  Future<void> _handleEditEvent(BuildContext context) async {
+    if (event.isRecurringEvent) {
+      final editType = await showDialog<EditRecurringEventType>(
+        context: context,
+        builder: (_) => EditRecurringEventDialog(event: event),
+      );
+      
+      if (editType != null) {
+        final result = await Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => CreateEventPage(
+              event: event,
+              editType: editType,
+            ),
+          ),
+        );
+
+        if (result != null) {
+          Navigator.of(context).pop();
+        }
+      }
+    } else {
+      final result = await Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => CreateEventPage(
+            event: event,
+          ),
+        ),
+      );
+
+      if (result != null) {
+        Navigator.of(context).pop();
+      }
+    }
   }
 
   /// Handles the deletion of an event, showing a dialog for repeating events.
