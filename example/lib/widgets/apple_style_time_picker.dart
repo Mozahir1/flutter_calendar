@@ -36,14 +36,27 @@ class _AppleStyleTimePickerState extends State<AppleStyleTimePicker> {
     _isAM = widget.initialTime.period == DayPeriod.am;
     
     // Initialize controllers with current values at center
-    _hourController = FixedExtentScrollController(initialItem: _centerOffset + _selectedHour - 1);
-    _minuteController = FixedExtentScrollController(initialItem: _centerOffset + _selectedMinute);
+    // Apply 3h50m offset to fix visual display issue
+    final minuteIndex = (_selectedMinute - 50) % 60;
+    final hourOffset = (_selectedHour - 3) % 12;
+    
+    _hourController = FixedExtentScrollController(initialItem: _centerOffset + hourOffset);
+    _minuteController = FixedExtentScrollController(initialItem: _centerOffset + minuteIndex);
     _periodController = FixedExtentScrollController(initialItem: _isAM ? 0 : 1);
     
     // Add listeners to handle infinite scrolling
     _hourController.addListener(() => _handleInfiniteScroll(_hourController, 12, _centerOffset));
     _minuteController.addListener(() => _handleInfiniteScroll(_minuteController, 60, _centerOffset));
     // AM/PM picker doesn't need infinite scroll
+    
+    // Ensure controllers are positioned correctly after the widget is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _hourController.jumpToItem(_centerOffset + hourOffset);
+        _minuteController.jumpToItem(_centerOffset + minuteIndex);
+        _periodController.jumpToItem(_isAM ? 0 : 1);
+      }
+    });
   }
 
   @override
