@@ -38,19 +38,18 @@ class _AppleStyleTimePickerState extends State<AppleStyleTimePicker> {
     // Initialize controllers with current values at center
     _hourController = FixedExtentScrollController(initialItem: _centerOffset + _selectedHour - 1);
     _minuteController = FixedExtentScrollController(initialItem: _centerOffset + _selectedMinute);
-    _periodController = FixedExtentScrollController(initialItem: _centerOffset + (_isAM ? 0 : 1));
+    _periodController = FixedExtentScrollController(initialItem: _isAM ? 0 : 1);
     
     // Add listeners to handle infinite scrolling
     _hourController.addListener(() => _handleInfiniteScroll(_hourController, 12, _centerOffset));
     _minuteController.addListener(() => _handleInfiniteScroll(_minuteController, 60, _centerOffset));
-    _periodController.addListener(() => _handleInfiniteScroll(_periodController, 2, _centerOffset));
+    // AM/PM picker doesn't need infinite scroll
   }
 
   @override
   void dispose() {
     _hourController.removeListener(() => _handleInfiniteScroll(_hourController, 12, _centerOffset));
     _minuteController.removeListener(() => _handleInfiniteScroll(_minuteController, 60, _centerOffset));
-    _periodController.removeListener(() => _handleInfiniteScroll(_periodController, 2, _centerOffset));
     _hourController.dispose();
     _minuteController.dispose();
     _periodController.dispose();
@@ -69,8 +68,18 @@ class _AppleStyleTimePickerState extends State<AppleStyleTimePicker> {
   }
 
   void _onTimeChanged() {
+    // Convert 12-hour format to 24-hour format correctly
+    int hour24;
+    if (_isAM) {
+      // AM: 12 becomes 0, 1-11 stay the same
+      hour24 = _selectedHour == 12 ? 0 : _selectedHour;
+    } else {
+      // PM: 1-11 add 12, 12 stays 12
+      hour24 = _selectedHour == 12 ? 12 : _selectedHour + 12;
+    }
+    
     final newTime = TimeOfDay(
-      hour: _isAM ? _selectedHour : _selectedHour + 12,
+      hour: hour24,
       minute: _selectedMinute,
     );
     widget.onTimeChanged?.call(newTime);
@@ -161,17 +170,17 @@ class _AppleStyleTimePickerState extends State<AppleStyleTimePicker> {
           
           // AM/PM picker
           Expanded(
-            child: _buildInfinitePicker(
+            child: _buildSimplePicker(
               controller: _periodController,
               onSelectedItemChanged: (index) {
                 setState(() {
-                  _isAM = index % 2 == 0;
+                  _isAM = index == 0;
                 });
                 _onTimeChanged();
               },
               itemBuilder: (context, index) {
-                final period = index % 2 == 0 ? 'AM' : 'PM';
-                final isSelected = (index % 2 == 0) == _isAM;
+                final period = index == 0 ? 'AM' : 'PM';
+                final isSelected = (index == 0) == _isAM;
                 return Container(
                   alignment: Alignment.center,
                   child: Text(
@@ -216,6 +225,37 @@ class _AppleStyleTimePickerState extends State<AppleStyleTimePicker> {
         onSelectedItemChanged: onSelectedItemChanged,
         childDelegate: ListWheelChildBuilderDelegate(
           childCount: _listSize, // Small list size with auto-repositioning
+          builder: itemBuilder,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSimplePicker({
+    required FixedExtentScrollController controller,
+    required ValueChanged<int> onSelectedItemChanged,
+    required Widget Function(BuildContext, int) itemBuilder,
+  }) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: colorScheme.outline.withValues(alpha: 0.2),
+          width: 1,
+        ),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: ListWheelScrollView.useDelegate(
+        controller: controller,
+        itemExtent: 50,
+        perspective: 0.005,
+        diameterRatio: 1.2,
+        physics: const FixedExtentScrollPhysics(),
+        onSelectedItemChanged: onSelectedItemChanged,
+        childDelegate: ListWheelChildBuilderDelegate(
+          childCount: 2, // Only AM and PM
           builder: itemBuilder,
         ),
       ),
