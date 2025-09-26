@@ -6,10 +6,11 @@ import '../widgets/add_event_form.dart';
 import '../widgets/edit_recurring_event_dialog.dart';
 
 class CreateEventPage extends StatelessWidget {
-  const CreateEventPage({super.key, this.event, this.editType});
+  const CreateEventPage({super.key, this.event, this.editType, this.specificDate});
 
   final CalendarEventData? event;
   final EditRecurringEventType? editType;
+  final DateTime? specificDate; // The specific date of the occurrence being edited
 
   @override
   Widget build(BuildContext context) {
@@ -50,6 +51,7 @@ class CreateEventPage extends StatelessWidget {
               context.pop(true);
             },
             event: event,
+            specificDate: specificDate,
           ),
         ),
       ),
@@ -65,8 +67,9 @@ class CreateEventPage extends StatelessWidget {
       switch (editType!) {
         case EditRecurringEventType.thisEvent:
           // Edit only this occurrence - create a new single event
+          // Use the specific date of the occurrence being edited
           final singleEvent = CalendarEventData(
-            date: newEvent.date,
+            date: specificDate ?? event!.date,  // Use specific date if available
             endDate: newEvent.endDate,
             startTime: newEvent.startTime,
             endTime: newEvent.endTime,
@@ -78,7 +81,7 @@ class CreateEventPage extends StatelessWidget {
           controller.add(singleEvent);
           // Delete the original occurrence
           controller.deleteRecurrenceEvent(
-            date: event!.date,
+            date: specificDate ?? event!.date,  // Use specific date if available
             event: event!,
             deleteEventType: DeleteEvent.current,
           );

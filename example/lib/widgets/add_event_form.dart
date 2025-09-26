@@ -11,11 +11,13 @@ import 'date_time_selector.dart';
 class AddOrEditEventForm extends StatefulWidget {
   final void Function(CalendarEventData)? onEventAdd;
   final CalendarEventData? event;
+  final DateTime? specificDate; // The specific date of the occurrence being edited
 
   const AddOrEditEventForm({
     super.key,
     this.onEventAdd,
     this.event,
+    this.specificDate,
   });
 
   @override
@@ -706,7 +708,8 @@ class _AddOrEditEventFormState extends State<AddOrEditEventForm> {
 
     final event = widget.event!;
 
-    _startDate = event.date;
+    // Use specificDate if provided (for recurring event editing), otherwise use event.date
+    _startDate = widget.specificDate ?? event.date;
     _endDate = event.endDate;
     _startTime = event.startTime ?? _startTime;
     _endTime = event.endTime ?? _endTime;

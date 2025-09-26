@@ -157,6 +157,7 @@ class DetailsPage extends StatelessWidget {
             builder: (_) => CreateEventPage(
               event: event,
               editType: editType,
+              specificDate: date, // Pass the specific date of the occurrence
             ),
           ),
         );
@@ -170,6 +171,7 @@ class DetailsPage extends StatelessWidget {
         MaterialPageRoute(
           builder: (_) => CreateEventPage(
             event: event,
+            specificDate: date, // Pass the specific date of the occurrence
           ),
         ),
       );
