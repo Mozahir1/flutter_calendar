@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 
 class AppleStyleTimePicker extends StatefulWidget {
@@ -23,8 +24,7 @@ class _AppleStyleTimePickerState extends State<AppleStyleTimePicker> {
   late int _selectedMinute;
   late bool _isAM;
   
-  static const int _centerOffset = 50; // Center position in the list
-  static const int _listSize = 100; // Small list size
+  static const int _centerOffset = 1000; // Center position in the list for infinite scrolling
 
   @override
   void initState() {
@@ -36,18 +36,14 @@ class _AppleStyleTimePickerState extends State<AppleStyleTimePicker> {
     _isAM = widget.initialTime.period == DayPeriod.am;
     
     // Initialize controllers with current values at center
-    // Apply 3h50m offset to fix visual display issue
-    final minuteIndex = (_selectedMinute - 50) % 60;
-    final hourOffset = (_selectedHour - 3) % 12;
+    final minuteIndex = _selectedMinute % 60;
+    final hourOffset = (_selectedHour - 1) % 12;
     
     _hourController = FixedExtentScrollController(initialItem: _centerOffset + hourOffset);
     _minuteController = FixedExtentScrollController(initialItem: _centerOffset + minuteIndex);
     _periodController = FixedExtentScrollController(initialItem: _isAM ? 0 : 1);
     
-    // Add listeners to handle infinite scrolling
-    _hourController.addListener(() => _handleInfiniteScroll(_hourController, 12, _centerOffset));
-    _minuteController.addListener(() => _handleInfiniteScroll(_minuteController, 60, _centerOffset));
-    // AM/PM picker doesn't need infinite scroll
+    // No custom infinite scroll logic - use Flutter's built-in capabilities
     
     // Ensure controllers are positioned correctly after the widget is built
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -61,24 +57,12 @@ class _AppleStyleTimePickerState extends State<AppleStyleTimePicker> {
 
   @override
   void dispose() {
-    _hourController.removeListener(() => _handleInfiniteScroll(_hourController, 12, _centerOffset));
-    _minuteController.removeListener(() => _handleInfiniteScroll(_minuteController, 60, _centerOffset));
     _hourController.dispose();
     _minuteController.dispose();
     _periodController.dispose();
     super.dispose();
   }
 
-  void _handleInfiniteScroll(FixedExtentScrollController controller, int cycle, int centerOffset) {
-    final currentIndex = controller.selectedItem;
-    
-    // If user has scrolled too far from center, reposition
-    if (currentIndex < centerOffset - cycle || currentIndex > centerOffset + cycle) {
-      // Calculate the equivalent position near center
-      final equivalentIndex = centerOffset + (currentIndex % cycle);
-      controller.jumpToItem(equivalentIndex);
-    }
-  }
 
   void _onTimeChanged() {
     // Convert 12-hour format to 24-hour format correctly
@@ -237,7 +221,7 @@ class _AppleStyleTimePickerState extends State<AppleStyleTimePicker> {
         physics: const FixedExtentScrollPhysics(),
         onSelectedItemChanged: onSelectedItemChanged,
         childDelegate: ListWheelChildBuilderDelegate(
-          childCount: _listSize, // Small list size with auto-repositioning
+          childCount: null, // Infinite scrolling
           builder: itemBuilder,
         ),
       ),
