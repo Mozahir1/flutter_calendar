@@ -42,8 +42,6 @@ class _AddOrEditFreeTimeFormState extends State<AddOrEditFreeTimeForm> {
 
   late final _descriptionController = TextEditingController();
   late final _occurrenceController = TextEditingController();
-  late final _titleController = TextEditingController();
-  late final _titleNode = FocusNode();
   late final _descriptionNode = FocusNode();
 
   @override
@@ -59,8 +57,6 @@ class _AddOrEditFreeTimeFormState extends State<AddOrEditFreeTimeForm> {
   void dispose() {
     _descriptionController.dispose();
     _occurrenceController.dispose();
-    _titleController.dispose();
-    _titleNode.dispose();
     _descriptionNode.dispose();
     super.dispose();
   }
@@ -81,7 +77,6 @@ class _AddOrEditFreeTimeFormState extends State<AddOrEditFreeTimeForm> {
 
   void _setTexts() {
     if (widget.event != null) {
-      _titleController.text = widget.event!.title;
       _descriptionController.text = widget.event!.description ?? '';
     }
   }
@@ -111,21 +106,6 @@ class _AddOrEditFreeTimeFormState extends State<AddOrEditFreeTimeForm> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            TextFormField(
-              controller: _titleController,
-              focusNode: _titleNode,
-              textCapitalization: TextCapitalization.words,
-              textInputAction: TextInputAction.next,
-              onFieldSubmitted: (_) => _descriptionNode.requestFocus(),
-              validator: (value) {
-                return (value?.isEmpty ?? true) ? 'Field required' : null;
-              },
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Title',
-              ),
-            ),
-            const SizedBox(height: 16),
             TextFormField(
               controller: _descriptionController,
               focusNode: _descriptionNode,
@@ -381,7 +361,7 @@ class _AddOrEditFreeTimeFormState extends State<AddOrEditFreeTimeForm> {
         recurrence != null ? (recurrence.endDate ?? _startDate) : _endDate;
 
     final freeTimeEvent = CalendarEventData(
-      title: _titleController.text,
+      title: 'Free Time',
       description: _descriptionController.text,
       color: _color, // Always transparent green for free time
       startTime: combinedStartTime,
