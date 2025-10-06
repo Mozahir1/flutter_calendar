@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../pages/event_details_page.dart';
 import '../pages/create_event_page.dart';
+import '../pages/create_free_time_page.dart';
 import '../extension.dart';
 import 'draggable_event_tile.dart';
 
@@ -241,7 +242,13 @@ class DayViewWidget extends StatelessWidget {
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                // TODO: Implement free time block creation
+                final defaultEvent = CalendarEventData(
+                  title: '',
+                  date: startTime,
+                  startTime: startTime,
+                  endTime: endTime,
+                );
+                context.pushRoute(CreateFreeTimePage(event: defaultEvent));
               },
               child: const Text('Free Time Block'),
             ),
