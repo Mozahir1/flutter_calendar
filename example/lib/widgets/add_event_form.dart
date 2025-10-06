@@ -43,8 +43,12 @@ class _AddOrEditEventFormState extends State<AddOrEditEventForm> {
   late final _descriptionController = TextEditingController();
   late final _occurrenceController = TextEditingController();
   late final _titleController = TextEditingController();
+  late final _professorController = TextEditingController();
+  late final _roomController = TextEditingController();
   late final _titleNode = FocusNode();
   late final _descriptionNode = FocusNode();
+  late final _professorNode = FocusNode();
+  late final _roomNode = FocusNode();
 
   @override
   void initState() {
@@ -56,9 +60,13 @@ class _AddOrEditEventFormState extends State<AddOrEditEventForm> {
   void dispose() {
     _titleNode.dispose();
     _descriptionNode.dispose();
+    _professorNode.dispose();
+    _roomNode.dispose();
 
     _descriptionController.dispose();
     _titleController.dispose();
+    _professorController.dispose();
+    _roomController.dispose();
     _occurrenceController.dispose();
 
     super.dispose();
@@ -322,6 +330,42 @@ class _AddOrEditEventFormState extends State<AddOrEditEventForm> {
                hintText: "Event Description (Optional)",
                counterStyle: TextStyle(color: color.onSurfaceVariant),
              ).applyDefaults(Theme.of(context).inputDecorationTheme),
+          ),
+          SizedBox(height: 15),
+          TextFormField(
+            controller: _professorController,
+            focusNode: _professorNode,
+            style: TextStyle(
+              color: color.onSurface,
+              fontSize: 17.0,
+            ),
+            keyboardType: TextInputType.text,
+            textInputAction: TextInputAction.next,
+            onFieldSubmitted: (_) => _roomNode.requestFocus(),
+            decoration: InputDecoration(
+              hintText: "Professor/Instructor (Optional)",
+              labelStyle: TextStyle(
+                color: color.onSurfaceVariant,
+              ),
+            ).applyDefaults(Theme.of(context).inputDecorationTheme),
+          ),
+          SizedBox(height: 15),
+          TextFormField(
+            controller: _roomController,
+            focusNode: _roomNode,
+            style: TextStyle(
+              color: color.onSurface,
+              fontSize: 17.0,
+            ),
+            keyboardType: TextInputType.text,
+            textInputAction: TextInputAction.done,
+            onFieldSubmitted: (_) => _roomNode.unfocus(),
+            decoration: InputDecoration(
+              hintText: "Room/Location (Optional)",
+              labelStyle: TextStyle(
+                color: color.onSurfaceVariant,
+              ),
+            ).applyDefaults(Theme.of(context).inputDecorationTheme),
           ),
           // Only show repeat settings if the event is recurring
           if (_isRecurring) ...[
@@ -656,6 +700,22 @@ class _AddOrEditEventFormState extends State<AddOrEditEventForm> {
                 ? _startDate
                 : _endDate;
 
+    // Combine description with professor and room information
+    String fullDescription = _descriptionController.text.trim();
+    if (_professorController.text.trim().isNotEmpty || _roomController.text.trim().isNotEmpty) {
+      final professor = _professorController.text.trim();
+      final room = _roomController.text.trim();
+      final classInfo = <String>[];
+      if (professor.isNotEmpty) classInfo.add('Professor: $professor');
+      if (room.isNotEmpty) classInfo.add('Room: $room');
+      
+      if (fullDescription.isNotEmpty) {
+        fullDescription += '\n\n${classInfo.join('\n')}';
+      } else {
+        fullDescription = classInfo.join('\n');
+      }
+    }
+
     final event = CalendarEventData(
       date: _startDate,
       endDate: eventEndDate,
@@ -663,7 +723,7 @@ class _AddOrEditEventFormState extends State<AddOrEditEventForm> {
       startTime: combinedStartTime,
       color: _color,
       title: _titleController.text.trim(),
-      description: _descriptionController.text.trim(),
+      description: fullDescription,
       recurrenceSettings: recurrence,
     );
 
@@ -714,7 +774,37 @@ class _AddOrEditEventFormState extends State<AddOrEditEventForm> {
     _startTime = event.startTime ?? _startTime;
     _endTime = event.endTime ?? _endTime;
     _titleController.text = event.title;
-    _descriptionController.text = event.description ?? '';
+    
+    // Parse professor and room from description
+    String description = event.description ?? '';
+    String professor = '';
+    String room = '';
+    
+    if (description.contains('Professor:') || description.contains('Room:')) {
+      final lines = description.split('\n');
+      final descriptionLines = <String>[];
+      
+      for (final line in lines) {
+        if (line.startsWith('Professor:')) {
+          professor = line.substring('Professor:'.length).trim();
+        } else if (line.startsWith('Room:')) {
+          room = line.substring('Room:'.length).trim();
+        } else if (line.trim().isNotEmpty) {
+          descriptionLines.add(line);
+        }
+      }
+      
+      // Remove the last empty line if it exists
+      if (descriptionLines.isNotEmpty && descriptionLines.last.trim().isEmpty) {
+        descriptionLines.removeLast();
+      }
+      
+      description = descriptionLines.join('\n');
+    }
+    
+    _descriptionController.text = description;
+    _professorController.text = professor;
+    _roomController.text = room;
     _color = event.color; // Set the event color
 
     // Handle recurrence settings
@@ -747,6 +837,8 @@ class _AddOrEditEventFormState extends State<AddOrEditEventForm> {
 
     _titleController.text = '';
     _descriptionController.text = '';
+    _professorController.text = '';
+    _roomController.text = '';
     _occurrenceController.text = '';
 
     _startDate = DateTime.now().withoutTime;
