@@ -2,6 +2,7 @@ import 'package:calendar_view/calendar_view.dart';
 import 'package:flutter/material.dart';
 
 import '../pages/event_details_page.dart';
+import 'free_time_event_arranger.dart';
 
 class MultiDayViewWidget extends StatelessWidget {
   final GlobalKey<MultiDayViewState>? state;
@@ -16,7 +17,7 @@ class MultiDayViewWidget extends StatelessWidget {
       daysInView: 3,
       width: width,
       showLiveTimeLineInAllDays: true,
-      eventArranger: FullWidthEventArranger(),
+      eventArranger: FreeTimeEventArranger(),
       timeLineWidth: 65,
       scrollPhysics: const BouncingScrollPhysics(),
       liveTimeIndicatorSettings: LiveTimeIndicatorSettings(

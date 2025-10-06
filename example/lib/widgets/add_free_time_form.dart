@@ -1,9 +1,7 @@
 import 'package:calendar_view/calendar_view.dart';
 import 'package:flutter/material.dart';
 
-import '../constants.dart';
 import '../extension.dart';
-import '../theme/app_colors.dart';
 import 'custom_button.dart';
 import 'date_time_selector.dart';
 
@@ -97,8 +95,6 @@ class _AddOrEditFreeTimeFormState extends State<AddOrEditFreeTimeForm> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final appColors = context.appColors;
 
     return Form(
       key: _form,

@@ -6,6 +6,7 @@ import '../pages/create_event_page.dart';
 import '../pages/create_free_time_page.dart';
 import '../extension.dart';
 import 'draggable_event_tile.dart';
+import 'free_time_event_arranger.dart';
 
 class DayViewWidget extends StatelessWidget {
   final GlobalKey<DayViewState>? state;
@@ -29,7 +30,7 @@ class DayViewWidget extends StatelessWidget {
       eventTileBuilder: (date, events, boundary, startDuration, endDuration) => 
           _buildDraggableEventTile(context, date, events, boundary, startDuration, endDuration),
       scrollPhysics: const BouncingScrollPhysics(),
-      eventArranger: FullWidthEventArranger(),
+      eventArranger: FreeTimeEventArranger(),
       showQuarterHours: false,
       hourIndicatorSettings: HourIndicatorSettings(
         color: Theme.of(context).dividerColor,

@@ -6,6 +6,7 @@ import '../pages/create_event_page.dart';
 import '../pages/create_free_time_page.dart';
 import '../extension.dart';
 import 'draggable_event_tile.dart';
+import 'free_time_event_arranger.dart';
 
 class WeekViewWidget extends StatelessWidget {
   final GlobalKey<WeekViewState>? state;
@@ -20,7 +21,7 @@ class WeekViewWidget extends StatelessWidget {
       width: width,
       showWeekends: true,
       showLiveTimeLineInAllDays: true,
-      eventArranger: FullWidthEventArranger(),
+      eventArranger: FreeTimeEventArranger(),
       eventTileBuilder: (date, events, boundary, startDuration, endDuration) => 
           _buildDraggableEventTile(context, date, events, boundary, startDuration, endDuration),
       timeLineWidth: 65,
