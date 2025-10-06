@@ -31,6 +31,7 @@ dependencies:
   intl:
   flutter_colorpicker: ^1.1.0
   path_provider: ^2.1.2
+  provider: ^6.1.1
   calendar_view:
     path: ../
 

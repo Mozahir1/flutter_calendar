@@ -1,10 +1,12 @@
 import 'package:calendar_view/calendar_view.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../pages/event_details_page.dart';
 import '../pages/create_event_page.dart';
 import '../extension.dart';
 import 'draggable_event_tile.dart';
+import '../controllers/enhanced_event_controller.dart';
 
 class DayViewWidget extends StatelessWidget {
   final GlobalKey<DayViewState>? state;
@@ -297,8 +299,14 @@ class DayViewWidget extends StatelessWidget {
               child: const Text('Cancel'),
             ),
             ElevatedButton(
-              onPressed: () {
-                CalendarControllerProvider.of(context).controller.remove(event);
+              onPressed: () async {
+                final enhancedController = Provider.of<EnhancedEventController>(context, listen: false);
+                final calendarController = CalendarControllerProvider.of(context).controller;
+                
+                // Delete from both controllers
+                await enhancedController.deleteEventByProperties(event);
+                calendarController.remove(event);
+                
                 Navigator.of(context).pop();
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(

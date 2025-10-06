@@ -2,12 +2,12 @@ import 'package:calendar_view/calendar_view.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../models/event_model.dart';
-import '../services/event_storage_service.dart';
+import '../services/universal_storage_service.dart';
 import '../widgets/edit_recurring_event_dialog.dart';
 
 /// Enhanced event controller that uses JSON storage for better event management
 class EnhancedEventController extends ChangeNotifier {
-  final EventStorageService _storage = EventStorageService.instance;
+  final UniversalStorageService _storage = UniversalStorageService.instance;
   
   List<EventModel> _events = [];
   List<EventCollection> _collections = [];
@@ -85,6 +85,61 @@ class EnhancedEventController extends ChangeNotifier {
     } catch (e) {
       print('Error deleting event: $e');
       rethrow;
+    }
+  }
+
+  /// Delete an event by matching CalendarEventData properties
+  Future<void> deleteEventByProperties(CalendarEventData event) async {
+    try {
+      // Find the event by matching properties
+      final eventToDelete = _events.firstWhere(
+        (e) => e.title == event.title &&
+               e.date.isAtSameMomentAs(event.date) &&
+               e.description == event.description,
+        orElse: () => throw Exception('Event not found'),
+      );
+      
+      await _storage.deleteEvent(eventToDelete.id);
+      _events.removeWhere((e) => e.id == eventToDelete.id);
+      notifyListeners();
+    } catch (e) {
+      print('Error deleting event by properties: $e');
+      // Don't rethrow - this is a best-effort operation
+    }
+  }
+
+  /// Update an event by matching CalendarEventData properties
+  Future<void> updateEventByProperties(CalendarEventData oldEvent, CalendarEventData newEvent) async {
+    try {
+      // Find the event by matching properties
+      final eventToUpdate = _events.firstWhere(
+        (e) => e.title == oldEvent.title &&
+               e.date.isAtSameMomentAs(oldEvent.date) &&
+               e.description == oldEvent.description,
+        orElse: () => throw Exception('Event not found'),
+      );
+      
+      final updatedModel = eventToUpdate.copyWith(
+        title: newEvent.title,
+        description: newEvent.description,
+        date: newEvent.date,
+        endDate: newEvent.endDate,
+        startTime: newEvent.startTime,
+        endTime: newEvent.endTime,
+        colorHex: newEvent.color.toARGB32().toRadixString(16).padLeft(8, '0'),
+        recurrenceSettings: newEvent.recurrenceSettings,
+        updatedAt: DateTime.now(),
+      );
+      
+      await _storage.updateEvent(updatedModel);
+      final index = _events.indexWhere((e) => e.id == eventToUpdate.id);
+      if (index != -1) {
+        _events[index] = updatedModel;
+        notifyListeners();
+      }
+    } catch (e) {
+      print('Error updating event by properties: $e');
+      // Don't rethrow - this is a best-effort operation
     }
   }
 

@@ -3,9 +3,12 @@ import 'dart:ui';
 import 'package:calendar_view/calendar_view.dart';
 import 'package:example/theme/app_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import 'pages/home_page.dart';
 import 'theme/app_colors.dart';
+import 'controllers/enhanced_event_controller.dart';
+import 'services/event_storage_service.dart';
 
 DateTime get _now => DateTime.now();
 
@@ -20,6 +23,42 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   bool isDarkMode = false;
+  late final EnhancedEventController _enhancedController;
+  late final EventController _calendarController;
+  bool _isInitialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _enhancedController = EnhancedEventController();
+    _calendarController = EventController();
+    _initializeControllers();
+  }
+
+  Future<void> _initializeControllers() async {
+    try {
+      // Initialize the enhanced controller (loads from JSON)
+      await _enhancedController.initialize();
+      
+      // Convert enhanced events to calendar events and add to calendar controller
+      final calendarEvents = _enhancedController.events
+          .map((eventModel) => eventModel.toCalendarEvent())
+          .toList();
+      
+      _calendarController.addAll(calendarEvents);
+      
+      setState(() {
+        _isInitialized = true;
+      });
+    } catch (e) {
+      print('Error initializing controllers: $e');
+      // Fallback to default events if JSON loading fails
+      _calendarController.addAll(_events);
+      setState(() {
+        _isInitialized = true;
+      });
+    }
+  }
 
   // This widget is the root of your application.
   @override
@@ -58,10 +97,17 @@ class _MyAppState extends State<MyApp> {
                 ? MultiDayViewThemeData.dark()
                 : MultiDayViewThemeData.light(),
           ),
-          child: CalendarControllerProvider(
-            controller: EventController()..addAll(_events),
-            child: child!,
-          ),
+          child: _isInitialized 
+            ? CalendarControllerProvider(
+                controller: _calendarController,
+                child: ChangeNotifierProvider.value(
+                  value: _enhancedController,
+                  child: child!,
+                ),
+              )
+            : const Center(
+                child: CircularProgressIndicator(),
+              ),
         );
       },
       home: HomePage(

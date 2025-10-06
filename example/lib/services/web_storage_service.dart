@@ -1,75 +1,36 @@
 import 'dart:convert';
-import 'dart:io';
-import 'package:path_provider/path_provider.dart';
-import 'package:flutter/foundation.dart';
+import 'dart:html' as html;
 import '../models/event_model.dart';
-import 'web_storage_service.dart';
 
-/// Service for managing event storage using local JSON files (mobile) or localStorage (web)
-class EventStorageService {
-  static const String _eventsFileName = 'events.json';
-  static const String _collectionsFileName = 'event_collections.json';
+/// Web-compatible storage service using browser's localStorage
+class WebStorageService {
+  static const String _eventsKey = 'calendar_events';
+  static const String _collectionsKey = 'calendar_collections';
   
-  static EventStorageService? _instance;
-  static EventStorageService get instance => _instance ??= EventStorageService._();
+  static WebStorageService? _instance;
+  static WebStorageService get instance => _instance ??= WebStorageService._();
   
-  EventStorageService._();
+  WebStorageService._();
 
-  /// Get the appropriate storage service based on platform
-  dynamic get _storage {
-    if (kIsWeb) {
-      return WebStorageService.instance;
-    } else {
-      return this;
-    }
-  }
-
-  /// Get the application documents directory
-  Future<Directory> get _documentsDirectory async {
-    return await getApplicationDocumentsDirectory();
-  }
-
-  /// Get the events file path
-  Future<File> get _eventsFile async {
-    final directory = await _documentsDirectory;
-    return File('${directory.path}/$_eventsFileName');
-  }
-
-  /// Get the collections file path
-  Future<File> get _collectionsFile async {
-    final directory = await _documentsDirectory;
-    return File('${directory.path}/$_collectionsFileName');
-  }
-
-  /// Save all events to JSON file
+  /// Save all events to localStorage
   Future<void> saveEvents(List<EventModel> events) async {
-    if (kIsWeb) {
-      return await WebStorageService.instance.saveEvents(events);
-    }
-    
     try {
-      final file = await _eventsFile;
       final jsonString = jsonEncode(events.map((e) => e.toJson()).toList());
-      await file.writeAsString(jsonString);
+      html.window.localStorage[_eventsKey] = jsonString;
     } catch (e) {
       print('Error saving events: $e');
       rethrow;
     }
   }
 
-  /// Load all events from JSON file
+  /// Load all events from localStorage
   Future<List<EventModel>> loadEvents() async {
-    if (kIsWeb) {
-      return await WebStorageService.instance.loadEvents();
-    }
-    
     try {
-      final file = await _eventsFile;
-      if (!await file.exists()) {
+      final jsonString = html.window.localStorage[_eventsKey];
+      if (jsonString == null || jsonString.isEmpty) {
         return [];
       }
       
-      final jsonString = await file.readAsString();
       final List<dynamic> jsonList = jsonDecode(jsonString);
       return jsonList.map((json) => EventModel.fromJson(json)).toList();
     } catch (e) {
@@ -78,35 +39,25 @@ class EventStorageService {
     }
   }
 
-  /// Save all event collections to JSON file
+  /// Save all event collections to localStorage
   Future<void> saveCollections(List<EventCollection> collections) async {
-    if (kIsWeb) {
-      return await WebStorageService.instance.saveCollections(collections);
-    }
-    
     try {
-      final file = await _collectionsFile;
       final jsonString = jsonEncode(collections.map((c) => c.toJson()).toList());
-      await file.writeAsString(jsonString);
+      html.window.localStorage[_collectionsKey] = jsonString;
     } catch (e) {
       print('Error saving collections: $e');
       rethrow;
     }
   }
 
-  /// Load all event collections from JSON file
+  /// Load all event collections from localStorage
   Future<List<EventCollection>> loadCollections() async {
-    if (kIsWeb) {
-      return await WebStorageService.instance.loadCollections();
-    }
-    
     try {
-      final file = await _collectionsFile;
-      if (!await file.exists()) {
+      final jsonString = html.window.localStorage[_collectionsKey];
+      if (jsonString == null || jsonString.isEmpty) {
         return [];
       }
       
-      final jsonString = await file.readAsString();
       final List<dynamic> jsonList = jsonDecode(jsonString);
       return jsonList.map((json) => EventCollection.fromJson(json)).toList();
     } catch (e) {
@@ -117,10 +68,6 @@ class EventStorageService {
 
   /// Add a new event
   Future<void> addEvent(EventModel event) async {
-    if (kIsWeb) {
-      return await WebStorageService.instance.addEvent(event);
-    }
-    
     final events = await loadEvents();
     events.add(event);
     await saveEvents(events);
@@ -128,10 +75,6 @@ class EventStorageService {
 
   /// Update an existing event
   Future<void> updateEvent(EventModel event) async {
-    if (kIsWeb) {
-      return await WebStorageService.instance.updateEvent(event);
-    }
-    
     final events = await loadEvents();
     final index = events.indexWhere((e) => e.id == event.id);
     if (index != -1) {
@@ -142,10 +85,6 @@ class EventStorageService {
 
   /// Delete an event
   Future<void> deleteEvent(String eventId) async {
-    if (kIsWeb) {
-      return await WebStorageService.instance.deleteEvent(eventId);
-    }
-    
     final events = await loadEvents();
     events.removeWhere((e) => e.id == eventId);
     await saveEvents(events);
@@ -153,10 +92,6 @@ class EventStorageService {
 
   /// Get an event by ID
   Future<EventModel?> getEvent(String eventId) async {
-    if (kIsWeb) {
-      return await WebStorageService.instance.getEvent(eventId);
-    }
-    
     final events = await loadEvents();
     try {
       return events.firstWhere((e) => e.id == eventId);
@@ -167,10 +102,6 @@ class EventStorageService {
 
   /// Get all events for a specific date
   Future<List<EventModel>> getEventsForDate(DateTime date) async {
-    if (kIsWeb) {
-      return await WebStorageService.instance.getEventsForDate(date);
-    }
-    
     final events = await loadEvents();
     return events.where((e) => 
       e.date.year == date.year && 
@@ -181,10 +112,6 @@ class EventStorageService {
 
   /// Get all events in a date range
   Future<List<EventModel>> getEventsInRange(DateTime startDate, DateTime endDate) async {
-    if (kIsWeb) {
-      return await WebStorageService.instance.getEventsInRange(startDate, endDate);
-    }
-    
     final events = await loadEvents();
     return events.where((e) => 
       e.date.isAfter(startDate.subtract(const Duration(days: 1))) &&
@@ -232,19 +159,6 @@ class EventStorageService {
     }
   }
 
-  /// Clear all data (for testing/reset purposes)
-  Future<void> clearAllData() async {
-    final eventsFile = await _eventsFile;
-    final collectionsFile = await _collectionsFile;
-    
-    if (await eventsFile.exists()) {
-      await eventsFile.delete();
-    }
-    if (await collectionsFile.exists()) {
-      await collectionsFile.delete();
-    }
-  }
-
   /// Get storage statistics
   Future<Map<String, int>> getStorageStats() async {
     final events = await loadEvents();
@@ -252,9 +166,53 @@ class EventStorageService {
     
     return {
       'totalEvents': events.length,
+      'totalCollections': collections.length,
       'recurringEvents': events.where((e) => e.recurrenceSettings != null).length,
-      'singleEvents': events.where((e) => e.recurrenceSettings == null).length,
-      'collections': collections.length,
+      'fullDayEvents': events.where((e) => e.startTime == null).length,
     };
+  }
+
+  /// Clear all data (for testing/reset purposes)
+  Future<void> clearAllData() async {
+    html.window.localStorage.remove(_eventsKey);
+    html.window.localStorage.remove(_collectionsKey);
+  }
+
+  /// Export all data as JSON string
+  Future<String> exportAllData() async {
+    final events = await loadEvents();
+    final collections = await loadCollections();
+    
+    final exportData = {
+      'events': events.map((e) => e.toJson()).toList(),
+      'collections': collections.map((c) => c.toJson()).toList(),
+      'exportedAt': DateTime.now().toIso8601String(),
+    };
+    
+    return const JsonEncoder.withIndent('  ').convert(exportData);
+  }
+
+  /// Import data from JSON string
+  Future<void> importData(String jsonString) async {
+    try {
+      final Map<String, dynamic> data = jsonDecode(jsonString);
+      
+      if (data['events'] != null) {
+        final List<EventModel> events = (data['events'] as List)
+            .map((json) => EventModel.fromJson(json))
+            .toList();
+        await saveEvents(events);
+      }
+      
+      if (data['collections'] != null) {
+        final List<EventCollection> collections = (data['collections'] as List)
+            .map((json) => EventCollection.fromJson(json))
+            .toList();
+        await saveCollections(collections);
+      }
+    } catch (e) {
+      print('Error importing data: $e');
+      rethrow;
+    }
   }
 }
