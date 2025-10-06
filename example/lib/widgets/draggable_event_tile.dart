@@ -143,7 +143,7 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
                     Text(
                       event.title,
                       style: TextStyle(
-                        color: event.titleStyle?.color ?? colorScheme.onPrimary,
+                        color: Colors.white,
                         fontSize: event.titleStyle?.fontSize ?? 14,
                         fontWeight: FontWeight.bold,
                         shadows: [
