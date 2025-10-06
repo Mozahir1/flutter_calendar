@@ -193,6 +193,8 @@ class _AddOrEditFreeTimeFormState extends State<AddOrEditFreeTimeForm> {
                         _selectedDays = List.filled(7, false);
                         _recurrenceEndDate = null;
                         _occurrenceController.clear();
+                      } else {
+                        _selectedFrequency = RepeatFrequency.daily;
                       }
                     });
                   },
@@ -214,36 +216,69 @@ class _AddOrEditFreeTimeFormState extends State<AddOrEditFreeTimeForm> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Repeat every'),
-            const SizedBox(height: 8),
-            DropdownButtonFormField<RepeatFrequency>(
-              value: _selectedFrequency,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
+            const Text(
+              'Repeat',
+              style: TextStyle(
+                fontWeight: FontWeight.w500,
+                fontSize: 17,
               ),
-              items: RepeatFrequency.values
-                  .where((frequency) => frequency != RepeatFrequency.doNotRepeat)
-                  .map((frequency) => DropdownMenuItem(
-                        value: frequency,
-                        child: Text(frequency.name),
-                      ))
-                  .toList(),
-              onChanged: (value) {
-                setState(() {
-                  _selectedFrequency = value;
-                });
-              },
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Radio(
+                  value: RepeatFrequency.daily,
+                  groupValue: _selectedFrequency,
+                  onChanged: (value) {
+                    setState(() => _selectedFrequency = value);
+                  },
+                ),
+                const Text('Daily'),
+              ],
+            ),
+            Row(
+              children: [
+                Radio(
+                  value: RepeatFrequency.weekly,
+                  groupValue: _selectedFrequency,
+                  onChanged: (value) {
+                    setState(() => _selectedFrequency = value);
+                  },
+                ),
+                const Text('Weekly'),
+              ],
+            ),
+            Row(
+              children: [
+                Radio(
+                  value: RepeatFrequency.monthly,
+                  groupValue: _selectedFrequency,
+                  onChanged: (value) {
+                    setState(() => _selectedFrequency = value);
+                  },
+                ),
+                const Text('Monthly'),
+              ],
+            ),
+            Row(
+              children: [
+                Radio(
+                  value: RepeatFrequency.yearly,
+                  groupValue: _selectedFrequency,
+                  onChanged: (value) {
+                    setState(() => _selectedFrequency = value);
+                  },
+                ),
+                const Text('Yearly'),
+              ],
+            ),
             if (_selectedFrequency == RepeatFrequency.weekly) ...[
-              const Text('Repeat on'),
-              const SizedBox(height: 8),
               Wrap(
-                spacing: 8,
                 children: List.generate(7, (index) {
                   final dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-                  return FilterChip(
+                  return ChoiceChip(
                     label: Text(dayNames[index]),
+                    showCheckmark: false,
                     selected: _selectedDays[index],
                     onSelected: (selected) {
                       setState(() {
@@ -253,35 +288,66 @@ class _AddOrEditFreeTimeFormState extends State<AddOrEditFreeTimeForm> {
                   );
                 }),
               ),
-              const SizedBox(height: 16),
             ],
-            const Text('Ends'),
-            const SizedBox(height: 8),
-            DropdownButtonFormField<RecurrenceEnd>(
-              value: _selectedRecurrenceEnd,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
+            const SizedBox(height: 15),
+            if (_selectedFrequency != RepeatFrequency.doNotRepeat)
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Reoccurrence ends on: ',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 17,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Radio(
+                        value: RecurrenceEnd.never,
+                        groupValue: _selectedRecurrenceEnd,
+                        onChanged: (value) {
+                          setState(() => _selectedRecurrenceEnd = value);
+                        },
+                      ),
+                      const Text('Never'),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Radio(
+                        value: RecurrenceEnd.onDate,
+                        groupValue: _selectedRecurrenceEnd,
+                        onChanged: (value) {
+                          setState(() => _selectedRecurrenceEnd = value);
+                        },
+                      ),
+                      const Text('On date'),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Radio(
+                        value: RecurrenceEnd.after,
+                        groupValue: _selectedRecurrenceEnd,
+                        onChanged: (value) {
+                          setState(() => _selectedRecurrenceEnd = value);
+                        },
+                      ),
+                      const Text('After'),
+                    ],
+                  ),
+                ],
               ),
-              items: RecurrenceEnd.values.map((end) => DropdownMenuItem(
-                        value: end,
-                        child: Text(end.name),
-                      )).toList(),
-              onChanged: (value) {
-                setState(() {
-                  _selectedRecurrenceEnd = value;
-                });
-              },
-            ),
-            const SizedBox(height: 16),
-            if (_selectedRecurrenceEnd == RecurrenceEnd.onDate) ...[
+            const SizedBox(height: 15),
+            if (_selectedRecurrenceEnd == RecurrenceEnd.onDate)
               DateTimeSelectorFormField(
                 type: DateTimeSelectionType.date,
                 onSelect: (date) => setState(() => _recurrenceEndDate = date),
                 initialDateTime: _recurrenceEndDate ?? _startDate,
               ),
-              const SizedBox(height: 16),
-            ],
-            if (_selectedRecurrenceEnd == RecurrenceEnd.after) ...[
+            if (_selectedRecurrenceEnd == RecurrenceEnd.after)
               TextFormField(
                 controller: _occurrenceController,
                 keyboardType: TextInputType.number,
@@ -290,7 +356,6 @@ class _AddOrEditFreeTimeFormState extends State<AddOrEditFreeTimeForm> {
                   labelText: 'Number of occurrences',
                 ),
               ),
-            ],
           ],
         ),
       ),
