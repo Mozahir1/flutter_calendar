@@ -3,11 +3,9 @@ import 'package:example/theme/app_colors.dart';
 import 'package:example/widgets/delete_event_dialog.dart';
 import 'package:example/widgets/edit_recurring_event_dialog.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../extension.dart';
 import 'create_event_page.dart';
-import '../controllers/enhanced_event_controller.dart';
 
 class DetailsPage extends StatelessWidget {
   final CalendarEventData event;
@@ -203,16 +201,11 @@ class DetailsPage extends StatelessWidget {
       result = DeleteEvent.all;
     }
     if (result != null) {
-      final enhancedController = Provider.of<EnhancedEventController>(context, listen: false);
-      final calendarController = CalendarControllerProvider.of(context).controller;
-      
-      // Delete from both controllers
-      await enhancedController.deleteEventByProperties(event);
-      calendarController.deleteRecurrenceEvent(
-            date: date,
-            event: event,
-            deleteEventType: result,
-          );
+      CalendarControllerProvider.of(context).controller.deleteRecurrenceEvent(
+        date: date,
+        event: event,
+        deleteEventType: result,
+      );
     }
   }
 }
