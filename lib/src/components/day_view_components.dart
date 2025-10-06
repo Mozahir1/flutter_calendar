@@ -70,11 +70,19 @@ class RoundedEventTile extends StatelessWidget {
             Expanded(
               child: Text(
                 title,
-                style: titleStyle ??
-                    TextStyle(
-                      fontSize: 20,
-                      color: backgroundColor.accent,
-                    ),
+                  style: titleStyle ??
+                      TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: backgroundColor.accent,
+                        shadows: [
+                          Shadow(
+                            offset: Offset(0.5, 0.5),
+                            blurRadius: 1.0,
+                            color: Colors.black.withOpacity(0.3),
+                          ),
+                        ],
+                      ),
                 softWrap: true,
                 overflow: TextOverflow.fade,
               ),
@@ -214,7 +222,15 @@ class FullDayEventView<T> extends StatelessWidget {
                   style: titleStyle ??
                       TextStyle(
                         fontSize: 16,
+                        fontWeight: FontWeight.bold,
                         color: events[index].color.accent,
+                        shadows: [
+                          Shadow(
+                            offset: Offset(0.5, 0.5),
+                            blurRadius: 1.0,
+                            color: Colors.black.withOpacity(0.3),
+                          ),
+                        ],
                       ),
                   maxLines: 1,
                 ),

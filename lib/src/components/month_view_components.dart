@@ -221,6 +221,14 @@ class FilledCell<T extends Object?> extends StatelessWidget {
                                       TextStyle(
                                         color: events[index].color.accent,
                                         fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                        shadows: [
+                                          Shadow(
+                                            offset: Offset(0.3, 0.3),
+                                            blurRadius: 0.5,
+                                            color: Colors.black.withOpacity(0.3),
+                                          ),
+                                        ],
                                       ),
                                 ),
                               ),

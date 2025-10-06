@@ -145,7 +145,14 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
                       style: TextStyle(
                         color: event.titleStyle?.color ?? colorScheme.onPrimary,
                         fontSize: event.titleStyle?.fontSize ?? 14,
-                        fontWeight: event.titleStyle?.fontWeight ?? FontWeight.w500,
+                        fontWeight: FontWeight.bold,
+                        shadows: [
+                          Shadow(
+                            offset: Offset(0.5, 0.5),
+                            blurRadius: 1.0,
+                            color: Colors.black.withOpacity(0.5),
+                          ),
+                        ],
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
