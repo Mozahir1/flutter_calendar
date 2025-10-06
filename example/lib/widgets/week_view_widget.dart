@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../pages/event_details_page.dart';
 import '../pages/create_event_page.dart';
+import '../pages/create_free_time_page.dart';
 import '../extension.dart';
 import 'draggable_event_tile.dart';
 
@@ -222,15 +223,47 @@ class WeekViewWidget extends StatelessWidget {
     final startTime = DateTime(date.year, date.month, date.day, date.hour, date.minute);
     final endTime = startTime.add(const Duration(hours: 1));
     
-    final defaultEvent = CalendarEventData(
-      title: '',
-      date: startTime,
-      startTime: startTime,
-      endTime: endTime,
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Create Event'),
+          content: const Text('What would you like to create?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                final defaultEvent = CalendarEventData(
+                  title: '',
+                  date: startTime,
+                  startTime: startTime,
+                  endTime: endTime,
+                );
+                context.pushRoute(CreateEventPage(event: defaultEvent));
+              },
+              child: const Text('Regular Event'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                final defaultEvent = CalendarEventData(
+                  title: '',
+                  date: startTime,
+                  startTime: startTime,
+                  endTime: endTime,
+                );
+                context.pushRoute(CreateFreeTimePage(event: defaultEvent));
+              },
+              child: const Text('Free Time Block'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+          ],
+        );
+      },
     );
-
-    // Navigate to the existing CreateEventPage with pre-filled data
-    context.pushRoute(CreateEventPage(event: defaultEvent));
   }
 
   /// Shows context menu for editing/deleting existing events
