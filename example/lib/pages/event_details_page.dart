@@ -44,7 +44,7 @@ class DetailsPage extends StatelessWidget {
         padding: const EdgeInsets.all(20.0),
         children: [
           Text(
-            "Date: ${event.date.dateToStringWithFormat(format: "dd/MM/yyyy")}",
+            "Date: ${event.date.dateToStringWithFormat(format: "MM/dd/yyyy")}",
           ),
           SizedBox(
             height: 15.0,

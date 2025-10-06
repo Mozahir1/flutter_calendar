@@ -127,7 +127,7 @@ class _DateTimeSelectorFormFieldState extends State<DateTimeSelectorFormField> {
       date = await _showDateSelector();
 
       _textEditingController.text = (date ?? _selectedDate)
-              ?.dateToStringWithFormat(format: "dd/MM/yyyy") ??
+              ?.dateToStringWithFormat(format: "MM/dd/yyyy") ??
           '';
     } else {
       date = await _showTimeSelector();
@@ -192,7 +192,7 @@ class _DateTimeSelectorFormFieldState extends State<DateTimeSelectorFormField> {
         // rebuilding the widget.
         WidgetsBinding.instance.addPostFrameCallback((_) {
           _textEditingController.text =
-              _selectedDate?.dateToStringWithFormat(format: "dd/MM/yyyy") ?? '';
+              _selectedDate?.dateToStringWithFormat(format: "MM/dd/yyyy") ?? '';
         });
 
         break;
