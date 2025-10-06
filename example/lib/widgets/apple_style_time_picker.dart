@@ -100,8 +100,23 @@ class _AppleStyleTimePickerState extends State<AppleStyleTimePicker> {
             child: _buildInfinitePicker(
               controller: _hourController,
               onSelectedItemChanged: (index) {
+                final newHour = (index % 12) + 1;
+                final previousHour = _selectedHour;
+                
                 setState(() {
-                  _selectedHour = (index % 12) + 1;
+                  _selectedHour = newHour;
+                  
+                  // Auto-switch AM/PM when transitioning between 11 and 12
+                  if ((previousHour == 11 && newHour == 12) || 
+                      (previousHour == 12 && newHour == 11)) {
+                    _isAM = !_isAM;
+                    // Update the period controller to reflect the change
+                    _periodController.animateToItem(
+                      _isAM ? 0 : 1,
+                      duration: const Duration(milliseconds: 200),
+                      curve: Curves.easeInOut,
+                    );
+                  }
                 });
                 _onTimeChanged();
               },
