@@ -51,6 +51,7 @@ class _DraggableMonthViewWidgetState extends State<DraggableMonthViewWidget> {
     bool isToday,
     bool isInMonth,
     bool hideDaysNotInMonth,
+    bool isOutOfMonth,
   ) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;

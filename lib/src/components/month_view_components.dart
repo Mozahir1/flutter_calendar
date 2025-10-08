@@ -113,6 +113,9 @@ class FilledCell<T extends Object?> extends StatelessWidget {
   /// defines that show and hide cell not is in current month
   final bool hideDaysNotInMonth;
 
+  /// defines that this cell is for a day outside the current month
+  final bool isOutOfMonth;
+
   /// This class will defines how cell will be displayed.
   /// This widget will display all the events as tile below date title.
   const FilledCell({
@@ -121,6 +124,7 @@ class FilledCell<T extends Object?> extends StatelessWidget {
     required this.events,
     this.isInMonth = false,
     this.hideDaysNotInMonth = true,
+    this.isOutOfMonth = false,
     this.shouldHighlight = false,
     this.backgroundColor = Colors.blue,
     this.highlightColor = Colors.blue,
@@ -203,7 +207,9 @@ class FilledCell<T extends Object?> extends StatelessWidget {
                                 ),
                         child: Container(
                           decoration: BoxDecoration(
-                            color: events[index].color,
+                            color: isOutOfMonth 
+                                ? events[index].color.withOpacity(context.monthViewColors.outOfMonthEventOpacity)
+                                : events[index].color,
                             borderRadius: BorderRadius.circular(4.0),
                           ),
                           margin: EdgeInsets.symmetric(
@@ -219,7 +225,9 @@ class FilledCell<T extends Object?> extends StatelessWidget {
                                   maxLines: 1,
                                   style: events[index].titleStyle ??
                                       TextStyle(
-                                        color: events[index].color.accent,
+                                        color: isOutOfMonth 
+                                            ? events[index].color.accent.withOpacity(context.monthViewColors.outOfMonthEventTextOpacity)
+                                            : events[index].color.accent,
                                         fontSize: 12,
                                         fontWeight: FontWeight.bold,
                                         shadows: [

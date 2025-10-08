@@ -602,6 +602,7 @@ class MonthViewState<T extends Object?> extends State<MonthView<T>> {
     bool isToday,
     bool isInMonth,
     bool hideDaysNotInMonth,
+    bool isOutOfMonth,
   ) {
     final themeColor = context.monthViewColors;
 
@@ -614,6 +615,7 @@ class MonthViewState<T extends Object?> extends State<MonthView<T>> {
             : themeColor.cellNotInMonthColor,
         events: events,
         isInMonth: isInMonth,
+        isOutOfMonth: isOutOfMonth,
         onTileTap: widget.onEventTap,
         onTileDoubleTap: widget.onEventDoubleTap,
         onTileLongTap: widget.onEventLongTap,
@@ -633,6 +635,7 @@ class MonthViewState<T extends Object?> extends State<MonthView<T>> {
           ? themeColor.cellInMonthColor
           : themeColor.cellNotInMonthColor,
       events: events,
+      isOutOfMonth: isOutOfMonth,
       onTileTap: widget.onEventTap,
       onTileLongTap: widget.onEventLongTap,
       onTileTapDetails: widget.onEventTapDetails,
@@ -780,11 +783,9 @@ class _MonthPageBuilder<T> extends StatelessWidget {
         itemCount: monthDays.length,
         shrinkWrap: true,
         itemBuilder: (context, index) {
-          // Hide events if `hideDaysNotInMonth` true
-          final events =
-              hideDaysNotInMonth && (monthDays[index].month != date.month)
-                  ? <CalendarEventData<T>>[]
-                  : controller.getEventsOnDay(monthDays[index]);
+          // Get events for the day, including out-of-month days
+          final events = controller.getEventsOnDay(monthDays[index]);
+          final isOutOfMonth = monthDays[index].month != date.month;
           return GestureDetector(
             onTap: () => onCellTap?.call(events, monthDays[index]),
             onLongPress: () => onDateLongPress?.call(monthDays[index]),
@@ -806,6 +807,7 @@ class _MonthPageBuilder<T> extends StatelessWidget {
                 monthDays[index].compareWithoutTime(DateTime.now()),
                 monthDays[index].month == date.month,
                 hideDaysNotInMonth,
+                isOutOfMonth,
               ),
             ),
           );

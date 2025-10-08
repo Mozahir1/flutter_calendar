@@ -17,6 +17,8 @@ class MonthViewThemeData extends ThemeExtension<MonthViewThemeData> {
     required this.headerTextColor,
     required this.headerBackgroundColor,
     required this.cellHighlightColor,
+    required this.outOfMonthEventOpacity,
+    required this.outOfMonthEventTextOpacity,
   });
 
   // Cell properties
@@ -37,7 +39,11 @@ class MonthViewThemeData extends ThemeExtension<MonthViewThemeData> {
 
   final Color cellHighlightColor;
 
-  // final Color
+  /// Opacity for events displayed on days outside the current month
+  final double outOfMonthEventOpacity;
+
+  /// Opacity for event text displayed on days outside the current month
+  final double outOfMonthEventTextOpacity;
 
   /// Get pre-defined colors for light theme
   MonthViewThemeData.light()
@@ -51,7 +57,9 @@ class MonthViewThemeData extends ThemeExtension<MonthViewThemeData> {
         headerIconColor = LightAppColors.onPrimary,
         headerTextColor = LightAppColors.onPrimary,
         headerBackgroundColor = LightAppColors.primary,
-        cellHighlightColor = LightAppColors.primary;
+        cellHighlightColor = LightAppColors.primary,
+        outOfMonthEventOpacity = 0.4,
+        outOfMonthEventTextOpacity = 0.7;
 
   /// Get pre-defined colors for dark theme
   MonthViewThemeData.dark()
@@ -65,7 +73,9 @@ class MonthViewThemeData extends ThemeExtension<MonthViewThemeData> {
         headerIconColor = DarkAppColors.onPrimary,
         headerTextColor = DarkAppColors.onPrimary,
         headerBackgroundColor = DarkAppColors.primary,
-        cellHighlightColor = DarkAppColors.primary;
+        cellHighlightColor = DarkAppColors.primary,
+        outOfMonthEventOpacity = 0.4,
+        outOfMonthEventTextOpacity = 0.7;
 
   @override
   ThemeExtension<MonthViewThemeData> copyWith({
@@ -80,6 +90,8 @@ class MonthViewThemeData extends ThemeExtension<MonthViewThemeData> {
     Color? headerTextColor,
     Color? headerBackgroundColor,
     Color? highlightColor,
+    double? outOfMonthEventOpacity,
+    double? outOfMonthEventTextOpacity,
   }) {
     return MonthViewThemeData(
       cellInMonthColor: cellInMonthColor ?? this.cellInMonthColor,
@@ -94,6 +106,8 @@ class MonthViewThemeData extends ThemeExtension<MonthViewThemeData> {
       headerBackgroundColor:
           headerBackgroundColor ?? this.headerBackgroundColor,
       cellHighlightColor: highlightColor ?? this.cellHighlightColor,
+      outOfMonthEventOpacity: outOfMonthEventOpacity ?? this.outOfMonthEventOpacity,
+      outOfMonthEventTextOpacity: outOfMonthEventTextOpacity ?? this.outOfMonthEventTextOpacity,
     );
   }
 
@@ -135,6 +149,8 @@ class MonthViewThemeData extends ThemeExtension<MonthViewThemeData> {
       cellHighlightColor:
           Color.lerp(cellHighlightColor, other.cellHighlightColor, t) ??
               cellHighlightColor,
+      outOfMonthEventOpacity: (outOfMonthEventOpacity + (other.outOfMonthEventOpacity - outOfMonthEventOpacity) * t),
+      outOfMonthEventTextOpacity: (outOfMonthEventTextOpacity + (other.outOfMonthEventTextOpacity - outOfMonthEventTextOpacity) * t),
     );
   }
 
