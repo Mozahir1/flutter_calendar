@@ -86,6 +86,11 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
         widget.onEventTap?.call(widget.events.first, widget.date);
       },
       onLongPressStart: (details) {
+        // Check if the touch is in a resize zone
+        if (_isInResizeZone(details.localPosition)) {
+          return; // Don't start drag or context menu in resize zones
+        }
+        
         // Start long press timer for context menu
         _contextMenuPosition = details.globalPosition;
         _longPressTimer = Timer(const Duration(milliseconds: 500), () {
@@ -95,6 +100,11 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
         });
       },
       onLongPressMoveUpdate: (details) {
+        // Check if the touch is in a resize zone
+        if (_isInResizeZone(details.localPosition)) {
+          return; // Don't start drag in resize zones
+        }
+        
         // If user starts moving, cancel context menu and start dragging
         if (_longPressTimer?.isActive == true) {
           _longPressTimer?.cancel();
@@ -184,8 +194,8 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
             ),
           ),
           
-          // Resize handle at the top
-          if (widget.boundary.height > 30) // Only show resize handle for tall events
+          // Top resize zone - 10% of event height for easy interaction
+          if (widget.boundary.height > 60) // Only show for events tall enough
             Positioned(
               top: 0,
               left: 0,
@@ -212,11 +222,11 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
                   }
                 },
                 child: Container(
-                  height: 8,
+                  height: (widget.boundary.height * 0.1).clamp(20.0, 40.0), // 10% of height, min 20px, max 40px
                   decoration: BoxDecoration(
                     color: _isResizing 
-                        ? colorScheme.primary
-                        : colorScheme.onPrimary.withValues(alpha: 0.3),
+                        ? colorScheme.primary.withValues(alpha: 0.2)
+                        : Colors.transparent,
                     borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(8),
                       topRight: Radius.circular(8),
@@ -224,13 +234,13 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
                   ),
                   child: Center(
                     child: Container(
-                      width: 20,
-                      height: 2,
+                      width: 40,
+                      height: 4,
                       decoration: BoxDecoration(
                         color: _isResizing 
                             ? colorScheme.onPrimary
-                            : colorScheme.primary,
-                        borderRadius: BorderRadius.circular(1),
+                            : colorScheme.primary.withValues(alpha: 0.4),
+                        borderRadius: BorderRadius.circular(2),
                       ),
                     ),
                   ),
@@ -238,8 +248,8 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
               ),
             ),
           
-          // Resize handle at the bottom
-          if (widget.boundary.height > 30) // Only show resize handle for tall events
+          // Bottom resize zone - 10% of event height for easy interaction
+          if (widget.boundary.height > 60) // Only show for events tall enough
             Positioned(
               bottom: 0,
               left: 0,
@@ -266,11 +276,11 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
                   }
                 },
                 child: Container(
-                  height: 8,
+                  height: (widget.boundary.height * 0.1).clamp(20.0, 40.0), // 10% of height, min 20px, max 40px
                   decoration: BoxDecoration(
                     color: _isResizing 
-                        ? colorScheme.primary
-                        : colorScheme.onPrimary.withValues(alpha: 0.3),
+                        ? colorScheme.primary.withValues(alpha: 0.2)
+                        : Colors.transparent,
                     borderRadius: const BorderRadius.only(
                       bottomLeft: Radius.circular(8),
                       bottomRight: Radius.circular(8),
@@ -278,13 +288,13 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
                   ),
                   child: Center(
                     child: Container(
-                      width: 20,
-                      height: 2,
+                      width: 40,
+                      height: 4,
                       decoration: BoxDecoration(
                         color: _isResizing 
                             ? colorScheme.onPrimary
-                            : colorScheme.primary,
-                        borderRadius: BorderRadius.circular(1),
+                            : colorScheme.primary.withValues(alpha: 0.4),
+                        borderRadius: BorderRadius.circular(2),
                       ),
                     ),
                   ),
@@ -441,6 +451,15 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
     _resizeStartTime = null;
     _resizeStartEndTime = null;
     _isResizingFromTop = false;
+  }
+
+  bool _isInResizeZone(Offset position) {
+    // Check if the touch is in the top or bottom resize zones (10% of height each)
+    final resizeZoneHeight = (widget.boundary.height * 0.1).clamp(20.0, 40.0);
+    final topResizeZone = Rect.fromLTWH(0, 0, widget.boundary.width, resizeZoneHeight);
+    final bottomResizeZone = Rect.fromLTWH(0, widget.boundary.height - resizeZoneHeight, widget.boundary.width, resizeZoneHeight);
+    
+    return topResizeZone.contains(position) || bottomResizeZone.contains(position);
   }
 
   void _showContextMenuOverlay() {
