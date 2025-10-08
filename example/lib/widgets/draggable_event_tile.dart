@@ -225,7 +225,7 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
                   height: (widget.boundary.height * 0.1).clamp(20.0, 40.0), // 10% of height, min 20px, max 40px
                   decoration: BoxDecoration(
                     color: _isResizing 
-                        ? colorScheme.primary.withValues(alpha: 0.2)
+                        ? _getDarkerColor(event.color).withValues(alpha: 0.3)
                         : Colors.transparent,
                     borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(8),
@@ -238,8 +238,8 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
                       height: 4,
                       decoration: BoxDecoration(
                         color: _isResizing 
-                            ? colorScheme.onPrimary
-                            : colorScheme.primary.withValues(alpha: 0.4),
+                            ? _getDarkerColor(event.color)
+                            : _getDarkerColor(event.color).withValues(alpha: 0.6),
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -279,7 +279,7 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
                   height: (widget.boundary.height * 0.1).clamp(20.0, 40.0), // 10% of height, min 20px, max 40px
                   decoration: BoxDecoration(
                     color: _isResizing 
-                        ? colorScheme.primary.withValues(alpha: 0.2)
+                        ? _getDarkerColor(event.color).withValues(alpha: 0.3)
                         : Colors.transparent,
                     borderRadius: const BorderRadius.only(
                       bottomLeft: Radius.circular(8),
@@ -292,8 +292,8 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
                       height: 4,
                       decoration: BoxDecoration(
                         color: _isResizing 
-                            ? colorScheme.onPrimary
-                            : colorScheme.primary.withValues(alpha: 0.4),
+                            ? _getDarkerColor(event.color)
+                            : _getDarkerColor(event.color).withValues(alpha: 0.6),
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -460,6 +460,14 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
     final bottomResizeZone = Rect.fromLTWH(0, widget.boundary.height - resizeZoneHeight, widget.boundary.width, resizeZoneHeight);
     
     return topResizeZone.contains(position) || bottomResizeZone.contains(position);
+  }
+
+  Color _getDarkerColor(Color color) {
+    // Create a darker shade by reducing brightness and saturation
+    final hsl = HSLColor.fromColor(color);
+    return hsl.withLightness((hsl.lightness * 0.6).clamp(0.0, 1.0))
+              .withSaturation((hsl.saturation * 1.2).clamp(0.0, 1.0))
+              .toColor();
   }
 
   void _showContextMenuOverlay() {
