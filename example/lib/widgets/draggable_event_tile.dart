@@ -55,6 +55,13 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
   // Real-time drag state
   Offset? _dragOffset;
   
+  // Resize state
+  Offset? _resizeStartPosition;
+  DateTime? _resizeStartTime;
+  DateTime? _resizeStartEndTime;
+  double? _resizeOffset;
+  bool _isResizingFromTop = false;
+  
   // Context menu state
   Offset? _contextMenuPosition;
   Timer? _longPressTimer;
@@ -112,19 +119,22 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
           // Main event tile
           Positioned(
             left: _isDragging ? (_dragOffset?.dx ?? 0) : 0,
-            top: _isDragging ? (_dragOffset?.dy ?? 0) : 0,
+            top: _isDragging ? (_dragOffset?.dy ?? 0) : 
+                 (_isResizing && _isResizingFromTop && _resizeOffset != null) ? -_resizeOffset! : 0,
             child: Container(
               width: widget.boundary.width,
-              height: widget.boundary.height,
+              height: _isResizing && _resizeOffset != null 
+                  ? widget.boundary.height + (_isResizingFromTop ? -_resizeOffset! : _resizeOffset!)
+                  : widget.boundary.height,
               decoration: BoxDecoration(
-                color: _isDragging 
+                color: (_isDragging || _isResizing)
                     ? event.color.withValues(alpha: 0.7)
                     : event.color,
                 borderRadius: BorderRadius.circular(8),
-                border: _isDragging 
+                border: (_isDragging || _isResizing)
                     ? Border.all(color: colorScheme.primary, width: 2)
                     : null,
-                boxShadow: _isDragging
+                boxShadow: (_isDragging || _isResizing)
                     ? [
                         BoxShadow(
                           color: Colors.black.withValues(alpha: 0.3),
@@ -174,6 +184,60 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
             ),
           ),
           
+          // Resize handle at the top
+          if (widget.boundary.height > 30) // Only show resize handle for tall events
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: GestureDetector(
+                onPanStart: (details) {
+                  _resizeStartPosition = details.localPosition;
+                  _resizeStartTime = widget.startDuration;
+                  _resizeStartEndTime = widget.endDuration;
+                  setState(() {
+                    _isResizing = true;
+                    _resizeOffset = 0;
+                    _isResizingFromTop = true;
+                  });
+                },
+                onPanUpdate: (details) {
+                  if (_isResizing && _resizeStartPosition != null) {
+                    _handleResize(details.localPosition);
+                  }
+                },
+                onPanEnd: (details) {
+                  if (_isResizing) {
+                    _finishResize();
+                  }
+                },
+                child: Container(
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: _isResizing 
+                        ? colorScheme.primary
+                        : colorScheme.onPrimary.withValues(alpha: 0.3),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(8),
+                      topRight: Radius.circular(8),
+                    ),
+                  ),
+                  child: Center(
+                    child: Container(
+                      width: 20,
+                      height: 2,
+                      decoration: BoxDecoration(
+                        color: _isResizing 
+                            ? colorScheme.onPrimary
+                            : colorScheme.primary,
+                        borderRadius: BorderRadius.circular(1),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          
           // Resize handle at the bottom
           if (widget.boundary.height > 30) // Only show resize handle for tall events
             Positioned(
@@ -182,12 +246,17 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
               right: 0,
               child: GestureDetector(
                 onPanStart: (details) {
+                  _resizeStartPosition = details.localPosition;
+                  _resizeStartTime = widget.startDuration;
+                  _resizeStartEndTime = widget.endDuration;
                   setState(() {
                     _isResizing = true;
+                    _resizeOffset = 0;
+                    _isResizingFromTop = false;
                   });
                 },
                 onPanUpdate: (details) {
-                  if (_isResizing) {
+                  if (_isResizing && _resizeStartPosition != null) {
                     _handleResize(details.localPosition);
                   }
                 },
@@ -239,9 +308,20 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
   }
 
   void _handleResize(Offset currentPosition) {
-    // Just update visual state, don't call the callback yet
+    if (_resizeStartPosition == null || _resizeStartEndTime == null) return;
+    
+    // Calculate the vertical movement for resize
+    final deltaY = currentPosition.dy - _resizeStartPosition!.dy;
+    
+    // For top resize, upward movement extends the event (moves start time earlier)
+    // For bottom resize, downward movement extends the event (moves end time later)
+    final adjustedDeltaY = _isResizingFromTop ? -deltaY : deltaY;
+    
+    // Convert pixel movement to time change using the same precision as drag
+    final minutesDelta = (adjustedDeltaY / widget.heightPerMinute).round();
+    
     setState(() {
-      // Visual feedback only - no event updates during resize
+      _resizeOffset = deltaY;
     });
   }
 
@@ -325,10 +405,42 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
   }
 
   void _finishResize() {
-    // Placeholder for resize functionality
+    if (_resizeOffset != null && _resizeStartEndTime != null) {
+      // Calculate time change (vertical movement for resize)
+      final adjustedDeltaY = _isResizingFromTop ? -_resizeOffset! : _resizeOffset!;
+      final minutesDelta = (adjustedDeltaY / widget.heightPerMinute).round();
+      
+      if (_isResizingFromTop) {
+        // Resizing from top - adjust start time
+        final newStartTime = _resizeStartTime!.add(Duration(minutes: minutesDelta));
+        
+        // Ensure the new start time is not after the end time (minimum 15 minutes)
+        final maximumStartTime = _resizeStartEndTime!.subtract(const Duration(minutes: 15));
+        final finalStartTime = newStartTime.isAfter(maximumStartTime) ? maximumStartTime : newStartTime;
+        
+        // Call the resize callback with updated start time
+        widget.onEventResized?.call(widget.events.first, finalStartTime, _resizeStartEndTime!);
+      } else {
+        // Resizing from bottom - adjust end time
+        final newEndTime = _resizeStartEndTime!.add(Duration(minutes: minutesDelta));
+        
+        // Ensure the new end time is not before the start time (minimum 15 minutes)
+        final minimumEndTime = _resizeStartTime!.add(const Duration(minutes: 15));
+        final finalEndTime = newEndTime.isBefore(minimumEndTime) ? minimumEndTime : newEndTime;
+        
+        // Call the resize callback with updated end time
+        widget.onEventResized?.call(widget.events.first, _resizeStartTime!, finalEndTime);
+      }
+    }
+    
     setState(() {
       _isResizing = false;
+      _resizeOffset = null;
     });
+    _resizeStartPosition = null;
+    _resizeStartTime = null;
+    _resizeStartEndTime = null;
+    _isResizingFromTop = false;
   }
 
   void _showContextMenuOverlay() {
