@@ -82,8 +82,10 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
 
     return GestureDetector(
       onTap: () {
-        // Tap opens edit menu
-        widget.onEventTap?.call(widget.events.first, widget.date);
+        // Only handle tap if not in resize zone
+        if (!_isInResizeZone(Offset.zero)) {
+          widget.onEventTap?.call(widget.events.first, widget.date);
+        }
       },
       onLongPressStart: (details) {
         // Check if the touch is in a resize zone
@@ -322,10 +324,6 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
     
     // Calculate the vertical movement for resize
     final deltaY = currentPosition.dy - _resizeStartPosition!.dy;
-    
-    // For top resize, upward movement (negative deltaY) should extend the event earlier
-    // For bottom resize, downward movement (positive deltaY) should extend the event later
-    // The deltaY already represents the correct direction for both cases
     
     setState(() {
       _resizeOffset = deltaY;
