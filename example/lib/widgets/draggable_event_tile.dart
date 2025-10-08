@@ -136,7 +136,7 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
             child: Container(
               width: widget.boundary.width,
               height: _isResizing && _resizeOffset != null 
-                  ? widget.boundary.height + _resizeOffset!
+                  ? widget.boundary.height + (_isResizingFromTop ? -_resizeOffset! : _resizeOffset!)
                   : widget.boundary.height,
               decoration: BoxDecoration(
                 color: (_isDragging || _isResizing)
