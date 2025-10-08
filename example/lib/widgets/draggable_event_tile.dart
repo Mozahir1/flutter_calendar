@@ -120,11 +120,11 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
           Positioned(
             left: _isDragging ? (_dragOffset?.dx ?? 0) : 0,
             top: _isDragging ? (_dragOffset?.dy ?? 0) : 
-                 (_isResizing && _isResizingFromTop && _resizeOffset != null) ? -_resizeOffset! : 0,
+                 (_isResizing && _isResizingFromTop && _resizeOffset != null) ? _resizeOffset! : 0,
             child: Container(
               width: widget.boundary.width,
               height: _isResizing && _resizeOffset != null 
-                  ? widget.boundary.height + (_isResizingFromTop ? -_resizeOffset! : _resizeOffset!)
+                  ? widget.boundary.height + _resizeOffset!
                   : widget.boundary.height,
               decoration: BoxDecoration(
                 color: (_isDragging || _isResizing)
@@ -313,12 +313,9 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
     // Calculate the vertical movement for resize
     final deltaY = currentPosition.dy - _resizeStartPosition!.dy;
     
-    // For top resize, upward movement extends the event (moves start time earlier)
-    // For bottom resize, downward movement extends the event (moves end time later)
-    final adjustedDeltaY = _isResizingFromTop ? -deltaY : deltaY;
-    
-    // Convert pixel movement to time change using the same precision as drag
-    final minutesDelta = (adjustedDeltaY / widget.heightPerMinute).round();
+    // For top resize, upward movement (negative deltaY) should extend the event earlier
+    // For bottom resize, downward movement (positive deltaY) should extend the event later
+    // The deltaY already represents the correct direction for both cases
     
     setState(() {
       _resizeOffset = deltaY;
@@ -407,11 +404,12 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
   void _finishResize() {
     if (_resizeOffset != null && _resizeStartEndTime != null) {
       // Calculate time change (vertical movement for resize)
-      final adjustedDeltaY = _isResizingFromTop ? -_resizeOffset! : _resizeOffset!;
-      final minutesDelta = (adjustedDeltaY / widget.heightPerMinute).round();
+      final minutesDelta = (_resizeOffset! / widget.heightPerMinute).round();
       
       if (_isResizingFromTop) {
         // Resizing from top - adjust start time
+        // Negative deltaY (upward drag) should move start time earlier (subtract minutes)
+        // Positive deltaY (downward drag) should move start time later (add minutes)
         final newStartTime = _resizeStartTime!.add(Duration(minutes: minutesDelta));
         
         // Ensure the new start time is not after the end time (minimum 15 minutes)
@@ -422,6 +420,8 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
         widget.onEventResized?.call(widget.events.first, finalStartTime, _resizeStartEndTime!);
       } else {
         // Resizing from bottom - adjust end time
+        // Positive deltaY (downward drag) should move end time later (add minutes)
+        // Negative deltaY (upward drag) should move end time earlier (subtract minutes)
         final newEndTime = _resizeStartEndTime!.add(Duration(minutes: minutesDelta));
         
         // Ensure the new end time is not before the start time (minimum 15 minutes)
