@@ -2,6 +2,9 @@ import 'package:calendar_view/calendar_view.dart';
 import 'package:flutter/material.dart';
 
 import '../pages/event_details_page.dart';
+import '../pages/create_event_page.dart';
+import '../pages/create_free_time_page.dart';
+import '../extension.dart';
 import 'draggable_month_cell.dart';
 
 class DraggableMonthViewWidget extends StatefulWidget {
@@ -41,6 +44,9 @@ class _DraggableMonthViewWidgetState extends State<DraggableMonthViewWidget> {
             ),
           ),
         );
+      },
+      onDateLongPress: (date) {
+        _showQuickEventDialog(context, date);
       },
     );
   }
@@ -192,5 +198,54 @@ class _DraggableMonthViewWidgetState extends State<DraggableMonthViewWidget> {
       _draggedEvent = null;
       _dragOverDate = null;
     });
+  }
+
+  /// Shows a quick event creation dialog when user long presses on calendar
+  void _showQuickEventDialog(BuildContext context, DateTime date) {
+    // Create a default event with the selected date (no specific time for month view)
+    final startTime = DateTime(date.year, date.month, date.day, 9, 0); // Default to 9 AM
+    final endTime = startTime.add(const Duration(hours: 1));
+    
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Create Event'),
+          content: const Text('What would you like to create?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                final defaultEvent = CalendarEventData(
+                  title: '',
+                  date: startTime,
+                  startTime: startTime,
+                  endTime: endTime,
+                );
+                context.pushRoute(CreateEventPage(event: defaultEvent));
+              },
+              child: const Text('Regular Event'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                final defaultEvent = CalendarEventData(
+                  title: '',
+                  date: startTime,
+                  startTime: startTime,
+                  endTime: endTime,
+                );
+                context.pushRoute(CreateFreeTimePage(event: defaultEvent));
+              },
+              child: const Text('Free Time Block'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+          ],
+        );
+      },
+    );
   }
 }
