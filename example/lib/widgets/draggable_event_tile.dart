@@ -95,10 +95,11 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
           return; // Don't start drag or context menu in resize zones
         }
         
-        // Start long press timer for context menu
+        // Only start long press timer if the touch is stationary
+        // This prevents interference with scrolling gestures
         _contextMenuPosition = details.globalPosition;
-        _longPressTimer = Timer(const Duration(milliseconds: 500), () {
-          if (mounted && !_isDragging) {
+        _longPressTimer = Timer(const Duration(milliseconds: 800), () {
+          if (mounted && !_isDragging && !_isResizing) {
             _showContextMenuOverlay();
           }
         });
@@ -109,20 +110,40 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
           return; // Don't start drag in resize zones
         }
         
-        // If user starts moving, cancel context menu and start dragging
+        // Cancel context menu timer if user starts moving (scrolling)
         if (_longPressTimer?.isActive == true) {
           _longPressTimer?.cancel();
-          _dragStartPosition = details.localPosition;
-          _dragStartTime = widget.startDuration;
-          setState(() {
-            _isDragging = true;
-          });
-        } else if (_isDragging && _dragStartPosition != null) {
+          return; // Don't start dragging on long press move - let scroll handle it
+        }
+        
+        // Only handle drag if we're already in a drag state
+        if (_isDragging && _dragStartPosition != null) {
           _handleDrag(details.localPosition);
         }
       },
       onLongPressEnd: (details) {
         _longPressTimer?.cancel();
+        if (_isDragging) {
+          _finishDrag();
+        }
+      },
+      // Add pan gesture detector for deliberate dragging
+      onPanStart: (details) {
+        // Only start drag if not in resize zone and not already in a long press
+        if (!_isInResizeZone(details.localPosition) && _longPressTimer?.isActive != true) {
+          _dragStartPosition = details.localPosition;
+          _dragStartTime = widget.startDuration;
+          setState(() {
+            _isDragging = true;
+          });
+        }
+      },
+      onPanUpdate: (details) {
+        if (_isDragging && _dragStartPosition != null) {
+          _handleDrag(details.localPosition);
+        }
+      },
+      onPanEnd: (details) {
         if (_isDragging) {
           _finishDrag();
         }
