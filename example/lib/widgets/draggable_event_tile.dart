@@ -61,6 +61,8 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
   DateTime? _resizeStartEndTime;
   double? _resizeOffset;
   bool _isResizingFromTop = false;
+  bool _isHoveringTopResize = false;
+  bool _isHoveringBottomResize = false;
   
   // Context menu state
   Offset? _contextMenuPosition;
@@ -211,6 +213,7 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
                     _isResizing = true;
                     _resizeOffset = 0;
                     _isResizingFromTop = true;
+                    _isHoveringTopResize = true;
                   });
                 },
                 onPanUpdate: (details) {
@@ -222,27 +225,70 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
                   if (_isResizing) {
                     _finishResize();
                   }
+                  setState(() {
+                    _isHoveringTopResize = false;
+                  });
                 },
-                child: Container(
-                  height: (widget.boundary.height * 0.1).clamp(20.0, 40.0), // 10% of height, min 20px, max 40px
-                  decoration: BoxDecoration(
-                    color: _isResizing 
-                        ? _getDarkerColor(event.color).withValues(alpha: 0.3)
-                        : Colors.transparent,
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(8),
-                      topRight: Radius.circular(8),
+                onPanCancel: () {
+                  setState(() {
+                    _isHoveringTopResize = false;
+                  });
+                },
+                child: MouseRegion(
+                  onEnter: (_) {
+                    if (!_isResizing) {
+                      setState(() {
+                        _isHoveringTopResize = true;
+                      });
+                    }
+                  },
+                  onExit: (_) {
+                    if (!_isResizing) {
+                      setState(() {
+                        _isHoveringTopResize = false;
+                      });
+                    }
+                  },
+                  child: Container(
+                    height: (widget.boundary.height * 0.1).clamp(20.0, 40.0), // 10% of height, min 20px, max 40px
+                    decoration: BoxDecoration(
+                      color: _isResizing 
+                          ? _getDarkerColor(event.color).withValues(alpha: 0.4)
+                          : _isHoveringTopResize 
+                              ? _getDarkerColor(event.color).withValues(alpha: 0.2)
+                              : Colors.transparent,
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(8),
+                        topRight: Radius.circular(8),
+                      ),
+                      border: _isHoveringTopResize || _isResizing
+                          ? Border.all(
+                              color: _getDarkerColor(event.color).withValues(alpha: 0.8),
+                              width: 1,
+                            )
+                          : null,
                     ),
-                  ),
-                  child: Center(
-                    child: Container(
-                      width: 40,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: _isResizing 
-                            ? _getDarkerColor(event.color)
-                            : _getDarkerColor(event.color).withValues(alpha: 0.6),
-                        borderRadius: BorderRadius.circular(2),
+                    child: Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: _isResizing 
+                              ? _getDarkerColor(event.color)
+                              : _isHoveringTopResize
+                                  ? _getDarkerColor(event.color).withValues(alpha: 0.8)
+                                  : _getDarkerColor(event.color).withValues(alpha: 0.6),
+                          borderRadius: BorderRadius.circular(2),
+                          boxShadow: _isHoveringTopResize || _isResizing
+                              ? [
+                                  BoxShadow(
+                                    color: _getDarkerColor(event.color).withValues(alpha: 0.3),
+                                    blurRadius: 2,
+                                    offset: const Offset(0, 1),
+                                  ),
+                                ]
+                              : null,
+                        ),
                       ),
                     ),
                   ),
@@ -265,6 +311,7 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
                     _isResizing = true;
                     _resizeOffset = 0;
                     _isResizingFromTop = false;
+                    _isHoveringBottomResize = true;
                   });
                 },
                 onPanUpdate: (details) {
@@ -276,27 +323,70 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
                   if (_isResizing) {
                     _finishResize();
                   }
+                  setState(() {
+                    _isHoveringBottomResize = false;
+                  });
                 },
-                child: Container(
-                  height: (widget.boundary.height * 0.1).clamp(20.0, 40.0), // 10% of height, min 20px, max 40px
-                  decoration: BoxDecoration(
-                    color: _isResizing 
-                        ? _getDarkerColor(event.color).withValues(alpha: 0.3)
-                        : Colors.transparent,
-                    borderRadius: const BorderRadius.only(
-                      bottomLeft: Radius.circular(8),
-                      bottomRight: Radius.circular(8),
+                onPanCancel: () {
+                  setState(() {
+                    _isHoveringBottomResize = false;
+                  });
+                },
+                child: MouseRegion(
+                  onEnter: (_) {
+                    if (!_isResizing) {
+                      setState(() {
+                        _isHoveringBottomResize = true;
+                      });
+                    }
+                  },
+                  onExit: (_) {
+                    if (!_isResizing) {
+                      setState(() {
+                        _isHoveringBottomResize = false;
+                      });
+                    }
+                  },
+                  child: Container(
+                    height: (widget.boundary.height * 0.1).clamp(20.0, 40.0), // 10% of height, min 20px, max 40px
+                    decoration: BoxDecoration(
+                      color: _isResizing 
+                          ? _getDarkerColor(event.color).withValues(alpha: 0.4)
+                          : _isHoveringBottomResize 
+                              ? _getDarkerColor(event.color).withValues(alpha: 0.2)
+                              : Colors.transparent,
+                      borderRadius: const BorderRadius.only(
+                        bottomLeft: Radius.circular(8),
+                        bottomRight: Radius.circular(8),
+                      ),
+                      border: _isHoveringBottomResize || _isResizing
+                          ? Border.all(
+                              color: _getDarkerColor(event.color).withValues(alpha: 0.8),
+                              width: 1,
+                            )
+                          : null,
                     ),
-                  ),
-                  child: Center(
-                    child: Container(
-                      width: 40,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: _isResizing 
-                            ? _getDarkerColor(event.color)
-                            : _getDarkerColor(event.color).withValues(alpha: 0.6),
-                        borderRadius: BorderRadius.circular(2),
+                    child: Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: _isResizing 
+                              ? _getDarkerColor(event.color)
+                              : _isHoveringBottomResize
+                                  ? _getDarkerColor(event.color).withValues(alpha: 0.8)
+                                  : _getDarkerColor(event.color).withValues(alpha: 0.6),
+                          borderRadius: BorderRadius.circular(2),
+                          boxShadow: _isHoveringBottomResize || _isResizing
+                              ? [
+                                  BoxShadow(
+                                    color: _getDarkerColor(event.color).withValues(alpha: 0.3),
+                                    blurRadius: 2,
+                                    offset: const Offset(0, 1),
+                                  ),
+                                ]
+                              : null,
+                        ),
                       ),
                     ),
                   ),
@@ -444,6 +534,8 @@ class _DraggableEventTileState<T> extends State<DraggableEventTile<T>> {
     setState(() {
       _isResizing = false;
       _resizeOffset = null;
+      _isHoveringTopResize = false;
+      _isHoveringBottomResize = false;
     });
     _resizeStartPosition = null;
     _resizeStartTime = null;
