@@ -29,7 +29,7 @@ class Constants {
   }
 
   static const Color defaultLiveTimeIndicatorColor = Color(0xff444444);
-  static const Color black = Color(0xff000000);
+  static const Color black = Color(0xff000001);
   static const Color white = Color(0xffffffff);
   static const Color headerBackground = Color(0xFFDCF0FF);
 
